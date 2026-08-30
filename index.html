@@ -228,6 +228,7 @@
             border-radius: 6px;
             margin-bottom: 20px;
             max-width: 600px;
+            position: relative;
         }
 
         .announcement-meta {
@@ -235,6 +236,19 @@
             font-size: 12px;
             margin-bottom: 8px;
             color: #222;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .delete-btn {
+            background: #9b2226;
+            color: white;
+            border: none;
+            padding: 2px 6px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
         }
 
         .announcement-text {
@@ -296,7 +310,7 @@
                 flex-shrink: 0;
             }
             .sidebar-brand {
-                display: none; /* Hide full logo header on mobile top bar to save space */
+                display: none;
             }
             .nav-item {
                 margin-bottom: 0;
@@ -557,16 +571,52 @@
             }
         }
 
+        // Auto-delete check for posts older than 7 days
+        function cleanOldPosts(posts) {
+            const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+            const now = new Date().getTime();
+            return posts.filter(p => {
+                if (!p.timestamp) return true; // keep if timestamp is missing
+                return (now - p.timestamp) < ONE_WEEK_MS;
+            });
+        }
+
         async function fetchPostsFromCloud() {
             try {
                 const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
                     headers: { 'X-Master-Key': JSONBIN_API_KEY }
                 });
                 const result = await response.json();
-                cachedPosts = result.record.posts || [];
-                renderFeed();
+                let rawPosts = result.record.posts || [];
+                
+                // Automatically scrub posts older than 1 week
+                const cleanedPosts = cleanOldPosts(rawPosts);
+                if (cleanedPosts.length !== rawPosts.length) {
+                    // Update cloud silently if old posts were removed
+                    await savePostsToCloudSilently(cleanedPosts);
+                } else {
+                    cachedPosts = cleanedPosts;
+                    renderFeed();
+                }
             } catch (error) {
                 console.error("Error loading posts:", error);
+            }
+        }
+
+        async function savePostsToCloudSilently(updatedPosts) {
+            try {
+                await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
+                    },
+                    body: JSON.stringify({ posts: updatedPosts })
+                });
+                cachedPosts = updatedPosts;
+                renderFeed();
+            } catch (error) {
+                console.error("Error updating cloud storage:", error);
             }
         }
 
@@ -591,14 +641,41 @@
             }
         }
 
+        // Check student daily quota (10 quizzes per day)
+        function checkStudentDailyLimit() {
+            if (isUserAdmin) return true;
+            const todayStr = new Date().toDateString();
+            const storedData = JSON.parse(localStorage.getItem('student_quiz_limit') || '{}');
+            
+            if (storedData.date !== todayStr) {
+                return true; // New day, reset count
+            }
+            return storedData.count < 10;
+        }
+
+        function incrementStudentDailyLimit() {
+            if (isUserAdmin) return;
+            const todayStr = new Date().toDateString();
+            const storedData = JSON.parse(localStorage.getItem('student_quiz_limit') || '{}');
+            
+            let count = (storedData.date === todayStr) ? (storedData.count || 0) + 1 : 1;
+            localStorage.setItem('student_quiz_limit', JSON.stringify({ date: todayStr, count: count }));
+        }
+
         async function publishPost() {
             const category = document.getElementById('post-category').value;
             const now = new Date();
             const timeString = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}/${now.toLocaleString('default', { month: 'long' })} ${now.getDate()}, ${now.getFullYear()}`;
+            const timestamp = now.getTime();
 
             let newPostData = {};
 
             if (category === 'ACTIVITIES') {
+                if (!checkStudentDailyLimit()) {
+                    alert("You have reached the limit of 10 quizzes per day! Please try again tomorrow.");
+                    return;
+                }
+
                 const authorInput = isUserAdmin ? 'YHODA LYONY' : (document.getElementById('quiz-author-name').value.trim() || 'Anonymous Student');
                 const question = document.getElementById('quiz-question').value.trim();
                 const opt1 = document.getElementById('quiz-opt1').value.trim();
@@ -616,12 +693,15 @@
                     category: 'ACTIVITIES',
                     author: authorInput,
                     time: timeString,
+                    timestamp: timestamp,
                     type: 'quiz',
                     question: question,
                     options: [opt1, opt2, opt3],
                     correct: correct,
                     explanation: explanation
                 };
+
+                incrementStudentDailyLimit();
 
                 if (!isUserAdmin) document.getElementById('quiz-author-name').value = '';
                 document.getElementById('quiz-question').value = '';
@@ -639,6 +719,7 @@
                     category: category,
                     author: 'YHODA LYONY',
                     time: timeString,
+                    timestamp: timestamp,
                     type: 'standard',
                     text: text
                 };
@@ -647,6 +728,15 @@
             }
 
             const updatedPosts = [newPostData, ...cachedPosts];
+            await savePostsToCloud(updatedPosts);
+        }
+
+        // Developer Delete Control function
+        async function deletePost(timestamp) {
+            if (!isUserAdmin) return;
+            if (!confirm("Are you sure you want to delete this post?")) return;
+
+            const updatedPosts = cachedPosts.filter(p => p.timestamp !== timestamp);
             await savePostsToCloud(updatedPosts);
         }
 
@@ -660,10 +750,15 @@
             }
 
             feed.innerHTML = posts.map((p, index) => {
+                const deleteButtonHtml = isUserAdmin ? `<button class="delete-btn" onclick="deletePost(${p.timestamp})">🗑️ Delete</button>` : '';
+
                 if (p.type === 'quiz') {
                     return `
                         <div class="announcement-item">
-                            <div class="announcement-meta">🎮 ${escapeHtml(p.author)} [${p.time}] - STUDENT ACTIVITY</div>
+                            <div class="announcement-meta">
+                                <span>🎮 ${escapeHtml(p.author)} [${p.time}] - STUDENT ACTIVITY</span>
+                                ${deleteButtonHtml}
+                            </div>
                             <div class="announcement-text" style="font-weight:bold; margin-bottom: 8px;">🎯 ${escapeHtml(p.question)}</div>
                             <div class="quiz-container">
                                 <div class="quiz-options">
@@ -681,7 +776,10 @@
                 } else {
                     return `
                         <div class="announcement-item">
-                            <div class="announcement-meta">${escapeHtml(p.author)} [${escapeHtml(p.time)}]</div>
+                            <div class="announcement-meta">
+                                <span>${escapeHtml(p.author)} [${escapeHtml(p.time)}]</span>
+                                ${deleteButtonHtml}
+                            </div>
                             <div class="announcement-text">${linkifyText(p.text)}</div>
                         </div>
                     `;
