@@ -375,13 +375,19 @@
                 height: calc(100vh - 60px);
                 padding: 15px;
             }
-            .logout-link {
-                top: 12px;
-                right: 15px;
-                padding: 4px 8px;
-                font-size: 10px;
-            }
-        }
+    .logout-link {
+        position: static; /* Removes the awkward floating overlap on mobile */
+        background: #9b2226; /* Distinct color so it's easy to spot */
+        color: white;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 12px;
+        white-space: nowrap;
+        margin-left: auto; /* Pushes it to the far right of the top bar */
+    }
+}
 
         /* --- FLOATING CHATBOT WIDGET --- */
         .chat-fab {
