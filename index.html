@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>1-K2 Org by YHODA LYONY</title>
+    <title>1K2 Organization By Yhoda Lyony</title>
 
     <style>
         :root {
@@ -77,7 +77,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 24px;
+            font-size: 30px;
         }
 
         .brand-title {
@@ -92,7 +92,6 @@
         }
 
         .login-card {
-font-weight: bold;
             background-color: #b5b5b5;
             color: var(--text-dark);
             width: 100%;
@@ -143,7 +142,6 @@ font-weight: bold;
         .dev-input-row button { width: 120px; border-radius: 25px; margin-bottom: 0; }
 
         .footer-credit {
-   font-weight:bold;
             margin-top: 40px;
             font-size: 12px;
             letter-spacing: 1px;
@@ -188,7 +186,7 @@ font-weight: bold;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 16px;
+            font-size: 20px;
         }
 
         .nav-item {
@@ -196,7 +194,7 @@ font-weight: bold;
             color: white;
             padding: 12px 20px;
             font-weight: bold;
-            font-size: 16px;
+            font-size: 15px;
             letter-spacing: 1px;
             margin-bottom: 8px;
             cursor: pointer;
@@ -441,11 +439,11 @@ font-weight: bold;
 </head>
 <body>
 
-    <div id="notification-banner" onclick="dismissAndRefresh()">🔔 New announcement or quiz posted! Click to view.</div>
+    <div id="notification-banner" onclick="dismissAndRefresh()">🔔 New announcement, quiz or confession posted! Click to view.</div>
 
     <div id="login-screen">
         <div class="brand-header">
-            <div class="logo-circle">✤</div>
+            <div class="logo-circle">❉</div>
             <div>
                 <div class="brand-title">BTVTED 1-K2 ORGANIZATION</div>
                 <div class="brand-sub">ALL RIGHTS RESERVED 2026</div>
@@ -453,12 +451,13 @@ font-weight: bold;
         </div>
 
         <div class="login-card">
-            <p>Eduk ka bai? Siksyon 1-K2, pindota ra Enter bai</p>
+            <p>Siksyon 1K2 ka dawg?, enter imo gmail dawg aron mag sugod ta</p>
+            <input type="email" id="student-gmail-input" placeholder="Your Gmail address" style="width:100%; background:#737373; border:none; padding:12px 15px; border-radius:25px; color:white; font-size:14px; outline:none; margin-bottom:15px; box-sizing:border-box;">
             <button class="action-btn" onclick="loginAsStudent()">ENTER</button>
 
-            <p>If you are the Developer or Admin, enter the code below.</p>
+            <p>If you are the developer or admin, enter your code below.</p>
             <div class="dev-input-row">
-                <input type="password" id="dev-code-input" placeholder="Type code (ПРИВЕТ)">
+                <input type="password" id="dev-code-input" placeholder="Type code">
                 <button class="action-btn" onclick="loginAsDeveloper()">ENTER</button>
             </div>
         </div>
@@ -471,7 +470,7 @@ font-weight: bold;
 
         <div class="sidebar">
             <div class="sidebar-brand">
-                <div class="sidebar-logo">✤</div>
+                <div class="sidebar-logo">❉</div>
                 <div style="font-size:10px;">
                     <b>1-K2 ORGANIZATION</b><br>
                     <span style="color:#888;">DEVELOP BY YHODA LYONY Y.P.</span>
@@ -479,14 +478,15 @@ font-weight: bold;
             </div>
             <div class="nav-item active" onclick="filterCategory('LINKS')">LINKS</div>
             <div class="nav-item" onclick="filterCategory('TEXT')">TEXT</div>
-            <div class="nav-item" onclick="filterCategory('GC')">GC</div>
-            <div class="nav-item" onclick="filterCategory('ACTIVITIES')">Fun ACTIVITIES</div>
+            <div class="nav-item" onclick="filterCategory('GC')">ANNC</div>
+            <div class="nav-item" onclick="filterCategory('ACTIVITIES')">FUN QUIZZES</div>
+            <div class="nav-item" onclick="filterCategory('CONFESSIONS')"> CONFESSIONS</div>
         </div>
 
         <div class="main-content">
             <div id="post-box" class="admin-post-box">
                 <div class="post-box-header-row" onclick="togglePostBoxCollapse()">
-                    <h4 style="margin: 0; color: #fff; font-size: 14px;" id="post-box-heading">Publish New Data / Link</h4>
+                    <h4 style="margin: 0; color: #fff; font-size: 14px;" id="post-box-heading">Post New Announcement / Link</h4>
                     <button class="collapse-toggle-btn" id="collapse-icon-btn">▲ Collapse</button>
                 </div>
 
@@ -494,8 +494,9 @@ font-weight: bold;
                     <select id="post-category" onchange="handleCategoryChange()" style="margin-top: 10px; margin-bottom: 10px; padding: 6px; background:#222; color:white; border:1px solid #555; border-radius:4px; width:100%;">
                         <option value="LINKS">LINKS</option>
                         <option value="TEXT">TEXT</option>
-                        <option value="GC">GC</option>
+                        <option value="GC">ANNC</option>
                         <option value="ACTIVITIES">ACTIVITIES (Fun Quiz)</option>
+                        <option value="CONFESSIONS">CONFESSIONS (Anonymous)</option>
                     </select>
 
                     <div id="standard-post-fields">
@@ -516,6 +517,11 @@ font-weight: bold;
                         <input type="text" id="quiz-explanation" placeholder="Explanation (optional)">
                     </div>
 
+                    <div id="confession-post-fields" class="hidden">
+                        <textarea id="confession-text" rows="3" placeholder="Type your anonymous confession here (Max 35 words)..."></textarea>
+                        <div id="word-count-display" style="font-size:11px; color:#aaa; margin-bottom: 8px;">Words: 0 / 35</div>
+                    </div>
+
                     <button onclick="publishPost()" style="margin-top: 5px; background: #fff; color: #000; border: none; padding: 8px 15px; font-weight: bold; border-radius: 4px; cursor: pointer;">Publish</button>
                 </div>
             </div>
@@ -523,15 +529,15 @@ font-weight: bold;
             <div id="announcement-feed"></div>
         </div>
 
-        <div class="chat-fab" onclick="toggleChatWindow()" title="Chat with Vanya">✤</div>
+        <div class="chat-fab" onclick="toggleChatWindow()" title="Chat with Vanya">❉</div>
 
         <div id="chat-popup" class="chat-popup hidden">
             <div class="chat-header">
-                <span>Sam Assistant</span>
+                <span>Vanya Assistant</span>
                 <button class="close-chat" onclick="toggleChatWindow()">✕</button>
             </div>
             <div id="chat-messages" class="chat-messages">
-                <div class="chat-bubble">Привет мой друг 👋 , I'm Sam, a Simulated Assistant Module/SAM created by Master Lyony. How can I assist you today?</div>
+                <div class="chat-bubble">Привет мой друг 👋 , I'm Vanya, a Dictionary-Based Program created by Master Lyony. How can I assist you today?</div>
             </div>
             <div class="chat-input-area">
                 <input type="text" id="chat-user-input" placeholder="Type a message..." onkeypress="handleChatKey(event)">
@@ -543,13 +549,29 @@ font-weight: bold;
     <script>
         const JSONBIN_BIN_ID = "6a92ee1af5f4af5e2951c25f";
         const JSONBIN_API_KEY = "$2a$10$KchZjS7XhA3UZUxc8l8dzuFMe13DrOfKuKVCrKvR2ujGpPDrtuhKC";
-        const SECRET_DEV_CODE = "admin123";
+        const SECRET_DEV_CODE = "master123";
         let activeCategory = "LINKS";
         let isUserAdmin = false;
+        let currentStudentGmail = "";
         let cachedPosts = [];
         let pollInterval = null;
 
+        // Auto-fill remembered Gmail on load if available
+        window.onload = function() {
+            const savedGmail = localStorage.getItem('reptilian_student_gmail');
+            if (savedGmail) {
+                document.getElementById('student-gmail-input').value = savedGmail;
+            }
+        };
+
         function loginAsStudent() {
+            const gmailVal = document.getElementById('student-gmail-input').value.trim();
+            if (!gmailVal || !gmailVal.includes('@')) {
+                alert("Please enter a valid Gmail address to continue!");
+                return;
+            }
+            currentStudentGmail = gmailVal;
+            localStorage.setItem('reptilian_student_gmail', gmailVal); // Automatically save for future use
             isUserAdmin = false;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard-screen').classList.remove('hidden');
@@ -565,6 +587,7 @@ font-weight: bold;
                 return;
             }
             isUserAdmin = true;
+            currentStudentGmail = "developer@admin.com";
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard-screen').classList.remove('hidden');
             adjustPostBoxVisibility();
@@ -574,13 +597,13 @@ font-weight: bold;
 
         function logout() {
             isUserAdmin = false;
+            currentStudentGmail = "";
             if (pollInterval) clearInterval(pollInterval);
             document.getElementById('dashboard-screen').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
             document.getElementById('dev-code-input').value = "";
         }
 
-        // Toggle Collapse / Expand Post Box
         function togglePostBoxCollapse() {
             const bodyElem = document.getElementById('post-box-body');
             const btnElem = document.getElementById('collapse-icon-btn');
@@ -592,7 +615,6 @@ font-weight: bold;
             }
         }
 
-        // Background Polling for New Announcements
         function startPolling() {
             if (pollInterval) clearInterval(pollInterval);
             pollInterval = setInterval(async () => {
@@ -605,7 +627,6 @@ font-weight: bold;
                     let latestPosts = result.record.posts || [];
                     
                     if (latestPosts.length > 0 && cachedPosts.length > 0) {
-                        // Compare the top item timestamp or total count
                         if (latestPosts.length !== cachedPosts.length || latestPosts[0].timestamp !== cachedPosts[0].timestamp) {
                             document.getElementById('notification-banner').classList.add('show');
                         }
@@ -613,7 +634,7 @@ font-weight: bold;
                 } catch (e) {
                     console.error("Polling check failed", e);
                 }
-            }, 10000); // Check every 10 seconds
+            }, 10000);
         }
 
         function dismissAndRefresh() {
@@ -638,17 +659,21 @@ font-weight: bold;
             const selectElem = document.getElementById('post-category');
             const standardFields = document.getElementById('standard-post-fields');
             const quizFields = document.getElementById('quiz-post-fields');
+            const confessionFields = document.getElementById('confession-post-fields');
 
             if (isUserAdmin) {
                 postBox.classList.remove('hidden');
                 selectElem.disabled = false;
                 handleCategoryChange();
             } else {
-                if (activeCategory === 'ACTIVITIES') {
+                if (activeCategory === 'ACTIVITIES' || activeCategory === 'CONFESSIONS') {
                     postBox.classList.remove('hidden');
                     selectElem.disabled = true;
                     standardFields.classList.add('hidden');
-                    quizFields.classList.remove('hidden');
+                    quizFields.classList.add('hidden');
+                    confessionFields.classList.add('hidden');
+                    if (activeCategory === 'ACTIVITIES') quizFields.classList.remove('hidden');
+                    if (activeCategory === 'CONFESSIONS') confessionFields.classList.remove('hidden');
                 } else {
                     postBox.classList.add('hidden');
                 }
@@ -659,13 +684,18 @@ font-weight: bold;
             const cat = document.getElementById('post-category').value;
             const standardFields = document.getElementById('standard-post-fields');
             const quizFields = document.getElementById('quiz-post-fields');
+            const confessionFields = document.getElementById('confession-post-fields');
+
+            standardFields.classList.add('hidden');
+            quizFields.classList.add('hidden');
+            confessionFields.classList.add('hidden');
 
             if (cat === 'ACTIVITIES') {
-                standardFields.classList.add('hidden');
                 quizFields.classList.remove('hidden');
+            } else if (cat === 'CONFESSIONS') {
+                confessionFields.classList.remove('hidden');
             } else {
                 standardFields.classList.remove('hidden');
-                quizFields.classList.add('hidden');
             }
         }
 
@@ -737,24 +767,21 @@ font-weight: bold;
             }
         }
 
-        function checkStudentDailyLimit() {
+        function checkDailyLimit(keyName, limitCount) {
             if (isUserAdmin) return true;
             const todayStr = new Date().toDateString();
-            const storedData = JSON.parse(localStorage.getItem('student_quiz_limit') || '{}');
+            const storedData = JSON.parse(localStorage.getItem(keyName) || '{}');
             
-            if (storedData.date !== todayStr) {
-                return true;
-            }
-            return storedData.count < 10;
+            if (storedData.date !== todayStr) return true;
+            return storedData.count < limitCount;
         }
 
-        function incrementStudentDailyLimit() {
+        function incrementDailyLimit(keyName) {
             if (isUserAdmin) return;
             const todayStr = new Date().toDateString();
-            const storedData = JSON.parse(localStorage.getItem('student_quiz_limit') || '{}');
-            
+            const storedData = JSON.parse(localStorage.getItem(keyName) || '{}');
             let count = (storedData.date === todayStr) ? (storedData.count || 0) + 1 : 1;
-            localStorage.setItem('student_quiz_limit', JSON.stringify({ date: todayStr, count: count }));
+            localStorage.setItem(keyName, JSON.stringify({ date: todayStr, count: count }));
         }
 
         async function publishPost() {
@@ -763,11 +790,16 @@ font-weight: bold;
             const timeString = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}/${now.toLocaleString('default', { month: 'long' })} ${now.getDate()}, ${now.getFullYear()}`;
             const timestamp = now.getTime();
 
+            // Pull stored Gmail automatically if variable is empty
+            if (!currentStudentGmail) {
+                currentStudentGmail = localStorage.getItem('reptilian_student_gmail') || 'unknown_student@gmail.com';
+            }
+
             let newPostData = {};
 
             if (category === 'ACTIVITIES') {
-                if (!checkStudentDailyLimit()) {
-                    alert("You have reached the limit of 10 quizzes per day! Please try again tomorrow.");
+                if (!checkDailyLimit('student_quiz_limit', 10)) {
+                    alert("You have reached the limit of 10 quizzes per day!");
                     return;
                 }
 
@@ -796,14 +828,46 @@ font-weight: bold;
                     explanation: explanation
                 };
 
-                incrementStudentDailyLimit();
-
+                incrementDailyLimit('student_quiz_limit');
                 if (!isUserAdmin) document.getElementById('quiz-author-name').value = '';
                 document.getElementById('quiz-question').value = '';
                 document.getElementById('quiz-opt1').value = '';
                 document.getElementById('quiz-opt2').value = '';
                 document.getElementById('quiz-opt3').value = '';
                 document.getElementById('quiz-explanation').value = '';
+
+            } else if (category === 'CONFESSIONS') {
+                if (!checkDailyLimit('student_confession_limit', 15)) {
+                    alert("You have reached the limit of 15 confessions per day!");
+                    return;
+                }
+
+                const confessionTextElem = document.getElementById('confession-text');
+                const textVal = confessionTextElem.value.trim();
+                if (!textVal) {
+                    alert("Please write your confession first!");
+                    return;
+                }
+
+                const wordCount = textVal.split(/\s+/).length;
+                if (wordCount > 35) {
+                    alert(`Confession is too long! Maximum limit is 35 words (Current: ${wordCount} words).`);
+                    return;
+                }
+
+                newPostData = {
+                    category: 'CONFESSIONS',
+                    author: 'Anonymous Student',
+                    authorGmail: currentStudentGmail, // Automatically captured and hidden from normal view
+                    time: timeString,
+                    timestamp: timestamp,
+                    type: 'confession',
+                    text: textVal
+                };
+
+                incrementDailyLimit('student_confession_limit');
+                confessionTextElem.value = '';
+                document.getElementById('word-count-display').innerText = "Words: 0 / 35";
 
             } else {
                 if (!isUserAdmin) return;
@@ -826,45 +890,53 @@ font-weight: bold;
             await savePostsToCloud(updatedPosts);
         }
 
-// Safer Developer Delete Control
-async function deletePost(timestamp) {
-    if (!isUserAdmin) return;
-    if (!confirm("Are you sure you want to delete this specific post?")) return;
-
-    try {
-        // 1. Fetch the absolute latest state from the cloud to prevent cache overwrites
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-            headers: { 'X-Master-Key': JSONBIN_API_KEY },
-            cache: 'no-store'
-        });
-        const result = await response.json();
-        let currentCloudPosts = result.record.posts || [];
-
-        // 2. Filter out ONLY the post that matches the precise unique timestamp
-        const updatedPosts = currentCloudPosts.filter(p => Number(p.timestamp) !== Number(timestamp));
-
-        // 3. Save the clean list back to the cloud
-        const saveResponse = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Master-Key': JSONBIN_API_KEY
-            },
-            body: JSON.stringify({ posts: updatedPosts })
+        document.addEventListener('input', function(e) {
+            if (e.target && e.target.id === 'confession-text') {
+                const words = e.target.value.trim() === '' ? 0 : e.target.value.trim().split(/\s+/).length;
+                const display = document.getElementById('word-count-display');
+                display.innerText = `Words: ${words} / 35`;
+                if (words > 35) {
+                    display.style.color = "#9b2226";
+                } else {
+                    display.style.color = "#aaa";
+                }
+            }
         });
 
-        if (saveResponse.ok) {
-            cachedPosts = updatedPosts;
-            renderFeed();
-        } else {
-            alert("Failed to update cloud storage after deletion.");
+        async function deletePost(timestamp) {
+            if (!isUserAdmin) return;
+            if (!confirm("Are you sure you want to delete this specific post?")) return;
+
+            try {
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_API_KEY },
+                    cache: 'no-store'
+                });
+                const result = await response.json();
+                let currentCloudPosts = result.record.posts || [];
+
+                const updatedPosts = currentCloudPosts.filter(p => Number(p.timestamp) !== Number(timestamp));
+
+                const saveResponse = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
+                    },
+                    body: JSON.stringify({ posts: updatedPosts })
+                });
+
+                if (saveResponse.ok) {
+                    cachedPosts = updatedPosts;
+                    renderFeed();
+                } else {
+                    alert("Failed to update cloud storage after deletion.");
+                }
+            } catch (error) {
+                console.error("Error during safe deletion:", error);
+                alert("An error occurred while deleting the post.");
+            }
         }
-    } catch (error) {
-        console.error("Error during safe deletion:", error);
-        alert("An error occurred while deleting the post.");
-    }
-}
-
 
         function renderFeed() {
             const feed = document.getElementById('announcement-feed');
@@ -897,6 +969,17 @@ async function deletePost(timestamp) {
                                     💡 <b>Explanation:</b> ${escapeHtml(p.explanation || 'No explanation provided.')}
                                 </div>
                             </div>
+                        </div>
+                    `;
+                } else if (p.type === 'confession') {
+                    const devGmailTag = (isUserAdmin && p.authorGmail) ? `<br><span style="color:#777; font-size:11px;">✉️ Gmail: ${escapeHtml(p.authorGmail)}</span>` : '';
+                    return `
+                        <div class="announcement-item">
+                            <div class="announcement-meta">
+                                <span>💌 Anonymous Confession [${escapeHtml(p.time)}]</span>
+                                ${deleteButtonHtml}
+                            </div>
+                            <div class="announcement-text">${escapeHtml(p.text)}${devGmailTag}</div>
                         </div>
                     `;
                 } else {
@@ -965,12 +1048,14 @@ async function deletePost(timestamp) {
             query = query.toLowerCase();
             if (query.includes('link') || query.includes('form')) {
                 return "You can check all shared links under the 'LINKS' tab in the sidebar menu.";
+            } else if (query.includes('confess')) {
+                return "Want to share your feelings anonymously? Go to the 'CONFESSIONS' tab in the menu!";
             } else if (query.includes('activity') || query.includes('quiz')) {
                 return "Head over to the 'ACTIVITIES' tab to play fun quizzes or publish your own question!";
             } else if (query.includes('hello') || query.includes('hi')) {
                 return "Привет! How can I assist your studies today?";
             } else {
-                return "I am Sam, your helper. Check out the sidebar categories for updates from Master Lyony!";
+                return "I am Vanya, your helper. Check out the sidebar categories for updates from Master Lyony!";
             }
         }
 
