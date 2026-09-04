@@ -81,7 +81,7 @@
         }
 
         .brand-title {
-            font-size: 16px;
+            font-size: 20px;
             font-weight: bold;
             letter-spacing: 1px;
         }
@@ -156,6 +156,7 @@
             height: 100vh;
             box-sizing: border-box;
             overflow: hidden;
+            position: relative;
         }
 
         .sidebar {
@@ -186,7 +187,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 20px;
+            font-size: 16px;
         }
 
         .nav-item {
@@ -322,21 +323,20 @@
             font-weight: 500;
         }
 
- .logout-link {
-    position: fixed;
-    bottom: 85px; /* Aligned right above the chatbot (which is at 25px + height) */
-    right: 25px;
-    background: #333;
-    color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 12px;
-    z-index: 999;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
-}
-
+        .logout-link {
+            position: fixed;
+            bottom: 85px;
+            right: 25px;
+            background: #333;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            z-index: 999;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
 
         /* --- MOBILE RESPONSIVE FIX --- */
         @media screen and (max-width: 768px) {
@@ -375,19 +375,19 @@
                 height: calc(100vh - 60px);
                 padding: 15px;
             }
-    .logout-link {
-        position: static; /* Removes the awkward floating overlap on mobile */
-        background: #9b2226; /* Distinct color so it's easy to spot */
-        color: white;
-        border: none;
-        padding: 8px 12px;
-        border-radius: 4px;
-        cursor: pointer;
-        font-size: 12px;
-        white-space: nowrap;
-        margin-left: auto; /* Pushes it to the far right of the top bar */
-    }
-}
+            .logout-link {
+                position: static;
+                background: #9b2226;
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 12px;
+                white-space: nowrap;
+                margin-left: auto;
+            }
+        }
 
         /* --- FLOATING CHATBOT WIDGET --- */
         .chat-fab {
@@ -459,8 +459,8 @@
         </div>
 
         <div class="login-card">
-            <p>Siksyon 1K2 ka dawg? enter imo gmail dawg</p>
-            <input type="email" id="student-gmail-input" placeholder="Your Gmail address" style="width:100%; background:#737373; border:none; padding:12px 15px; border-radius:25px; color:white; font-size:14px; outline:none; margin-bottom:15px; box-sizing:border-box;">
+            <p>Enter your Name or Nickname to enter portal</p>
+            <input type="text" id="student-name-input" placeholder="Your Name or Nickname" style="width:100%; background:#737373; border:none; padding:12px 15px; border-radius:25px; color:white; font-size:14px; outline:none; margin-bottom:15px; box-sizing:border-box;">
             <button class="action-btn" onclick="loginAsStudent()">ENTER</button>
 
             <p>If you are the developer or admin, enter your code below.</p>
@@ -486,13 +486,13 @@
             <div class="nav-item" onclick="filterCategory('TEXT')">TEXT</div>
             <div class="nav-item" onclick="filterCategory('GC')">ANNC</div>
             <div class="nav-item" onclick="filterCategory('ACTIVITIES')">Fun QUIZZES</div>
-            <div class="nav-item" onclick="filterCategory('CONFESSIONS')">CONFESSIONS</div>
+            <div class="nav-item" onclick="filterCategory('CONFESSIONS')"> CONFESSIONS</div>
         </div>
 
         <div class="main-content">
             <div id="post-box" class="admin-post-box">
                 <div class="post-box-header-row" onclick="togglePostBoxCollapse()">
-                    <h4 style="margin: 0; color: #fff; font-size: 14px;" id="post-box-heading">PUBLISH NEW DATA</h4>
+                    <h4 style="margin: 0; color: #fff; font-size: 14px;" id="post-box-heading">Publish New Data/ Link</h4>
                     <button class="collapse-toggle-btn" id="collapse-icon-btn">▲ Collapse</button>
                 </div>
 
@@ -535,7 +535,6 @@
             <div id="announcement-feed"></div>
         </div>
 
-        <!-- Exit Portal and Chatbot button -->
         <button class="logout-link" onclick="logout()">Exit Portal</button>
 
         <div class="chat-fab" onclick="toggleChatWindow()" title="Chat with Vanya">❉</div>
@@ -555,33 +554,32 @@
         </div>
     </div>
 
-
     <script>
         const JSONBIN_BIN_ID = "6a92ee1af5f4af5e2951c25f";
         const JSONBIN_API_KEY = "$2a$10$KchZjS7XhA3UZUxc8l8dzuFMe13DrOfKuKVCrKvR2ujGpPDrtuhKC";
-        const SECRET_DEV_CODE = "master123";
+        const SECRET_DEV_CODE = "admin123";
         let activeCategory = "LINKS";
         let isUserAdmin = false;
-        let currentStudentGmail = "";
+        let currentStudentName = "";
         let cachedPosts = [];
         let pollInterval = null;
 
-        // Auto-fill remembered Gmail on load if available
+        // Auto-fill remembered student name on load if available
         window.onload = function() {
-            const savedGmail = localStorage.getItem('reptilian_student_gmail');
-            if (savedGmail) {
-                document.getElementById('student-gmail-input').value = savedGmail;
+            const savedName = localStorage.getItem('reptilian_student_name');
+            if (savedName) {
+                document.getElementById('student-name-input').value = savedName;
             }
         };
 
         function loginAsStudent() {
-            const gmailVal = document.getElementById('student-gmail-input').value.trim();
-            if (!gmailVal || !gmailVal.includes('@')) {
-                alert("Please enter a valid Gmail address to continue!");
+            const nameVal = document.getElementById('student-name-input').value.trim();
+            if (!nameVal) {
+                alert("Please enter your name or nickname to continue!");
                 return;
             }
-            currentStudentGmail = gmailVal;
-            localStorage.setItem('reptilian_student_gmail', gmailVal); // Automatically save for future use
+            currentStudentName = nameVal;
+            localStorage.setItem('reptilian_student_name', nameVal); // Saved for future convenience
             isUserAdmin = false;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard-screen').classList.remove('hidden');
@@ -597,7 +595,7 @@
                 return;
             }
             isUserAdmin = true;
-            currentStudentGmail = "developer@admin.com";
+            currentStudentName = "Developer";
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard-screen').classList.remove('hidden');
             adjustPostBoxVisibility();
@@ -607,7 +605,7 @@
 
         function logout() {
             isUserAdmin = false;
-            currentStudentGmail = "";
+            currentStudentName = "";
             if (pollInterval) clearInterval(pollInterval);
             document.getElementById('dashboard-screen').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
@@ -800,9 +798,8 @@
             const timeString = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}/${now.toLocaleString('default', { month: 'long' })} ${now.getDate()}, ${now.getFullYear()}`;
             const timestamp = now.getTime();
 
-            // Pull stored Gmail automatically if variable is empty
-            if (!currentStudentGmail) {
-                currentStudentGmail = localStorage.getItem('reptilian_student_gmail') || 'unknown_student@gmail.com';
+            if (!currentStudentName) {
+                currentStudentName = localStorage.getItem('reptilian_student_name') || 'Anonymous Student';
             }
 
             let newPostData = {};
@@ -813,7 +810,7 @@
                     return;
                 }
 
-                const authorInput = isUserAdmin ? 'YHODA LYONY' : (document.getElementById('quiz-author-name').value.trim() || 'Anonymous Student');
+                const authorInput = isUserAdmin ? 'YHODA LYONY' : (document.getElementById('quiz-author-name').value.trim() || currentStudentName);
                 const question = document.getElementById('quiz-question').value.trim();
                 const opt1 = document.getElementById('quiz-opt1').value.trim();
                 const opt2 = document.getElementById('quiz-opt2').value.trim();
@@ -868,7 +865,7 @@
                 newPostData = {
                     category: 'CONFESSIONS',
                     author: 'Anonymous Student',
-                    authorGmail: currentStudentGmail, // Automatically captured and hidden from normal view
+                    authorName: currentStudentName, // Captured quietly behind the scenes; only visible to developer
                     time: timeString,
                     timestamp: timestamp,
                     type: 'confession',
@@ -964,7 +961,7 @@
                     return `
                         <div class="announcement-item">
                             <div class="announcement-meta">
-                                <span>❉ ${escapeHtml(p.author)} [${p.time}] - STUDENT ACTIVITY</span>
+                                <span>🎮 ${escapeHtml(p.author)} [${p.time}] - STUDENT ACTIVITY</span>
                                 ${deleteButtonHtml}
                             </div>
                             <div class="announcement-text" style="font-weight:bold; margin-bottom: 8px;">🎯 ${escapeHtml(p.question)}</div>
@@ -982,14 +979,15 @@
                         </div>
                     `;
                 } else if (p.type === 'confession') {
-                    const devGmailTag = (isUserAdmin && p.authorGmail) ? `<br><span style="color:#777; font-size:11px;">Gmail: ${escapeHtml(p.authorGmail)}</span>` : '';
+                    // Show real name strictly to the developer
+                    const devNameTag = (isUserAdmin && p.authorName) ? `<br><span style="color:#777; font-size:11px;">👤 Sender Name: ${escapeHtml(p.authorName)}</span>` : '';
                     return `
                         <div class="announcement-item">
                             <div class="announcement-meta">
                                 <span>💌 Anonymous Confession [${escapeHtml(p.time)}]</span>
                                 ${deleteButtonHtml}
                             </div>
-                            <div class="announcement-text">${escapeHtml(p.text)}${devGmailTag}</div>
+                            <div class="announcement-text">${escapeHtml(p.text)}${devNameTag}</div>
                         </div>
                     `;
                 } else {
