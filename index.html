@@ -708,7 +708,7 @@
         }
 
         function cleanOldPosts(posts) {
-            const ONE_WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+            const ONE_WEEK_MS = 3 * 24 * 60 * 60 * 1000;
             const now = new Date().getTime();
             return posts.filter(p => {
                 if (!p.timestamp) return true;
@@ -844,7 +844,7 @@
                 document.getElementById('quiz-explanation').value = '';
 
             } else if (category === 'CONFESSIONS') {
-                if (!checkDailyLimit('student_confession_limit', 15)) {
+                if (!checkDailyLimit('student_confession_limit', 8)) {
                     alert("You have reached the limit of 15 confessions per day!");
                     return;
                 }
