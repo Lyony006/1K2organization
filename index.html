@@ -517,8 +517,8 @@
             </div>
             <div class="nav-item active" onclick="filterCategory('LINKS')">LINKS</div>
             <div class="nav-item" onclick="filterCategory('TEXT')">TEXT</div>
-            <div class="nav-item" onclick="filterCategory('GC')">ANNC / QUIZZES</div>
-            <div class="nav-item" onclick="filterCategory('ACTIVITIES')">Fun QUIZZES</div>
+            <div class="nav-item" onclick="filterCategory('GC')">QUIZZES</div>
+            <div class="nav-item" onclick="filterCategory('ACTIVITIES')">Q&A</div>
             <div class="nav-item" onclick="filterCategory('CONFESSIONS')">CONFESSIONS</div>
         </div>
 
@@ -533,8 +533,8 @@
                     <select id="post-category" onchange="handleCategoryChange()" style="margin-top: 10px; margin-bottom: 10px; padding: 6px; background:#222; color:white; border:1px solid #555; border-radius:4px; width:100%;">
                         <option value="LINKS">LINKS</option>
                         <option value="TEXT">TEXT</option>
-                        <option value="GC">ANNC</option>
-                        <option value="ACTIVITIES">ACTIVITIES (Fun Quiz)</option>
+                        <option value="GC">QUIZZES</option>
+                        <option value="ACTIVITIES">ACTIVITIES (Fun Q&A)</option>
                         <option value="CONFESSIONS">CONFESSIONS (Anonymous)</option>
                     </select>
 
@@ -596,7 +596,41 @@
         const SPECTATOR_SECRET_CODE = "spectator123";
 
         const AUTHORIZED_STUDENTS = [
-            { id: "1388623", lastName: "Pairez", fullName: "Pairez, Yhoda Lyony Y." }
+    { id: "1392510", lastName: "Adolfo", fullName: "Adolfo, James Kharl A." },
+    { id: "1391137", lastName: "Akiatan", fullName: "Akiatan, Samantha Nicole V." },
+    { id: "1395454", lastName: "Almencion", fullName: "Almencion, Yya B." },
+    { id: "1391200", lastName: "Bancale", fullName: "Bancale, Jaylord D." },
+    { id: "1391367", lastName: "Bihag", fullName: "Bihag, Madonna M." },
+    { id: "1391634", lastName: "Caga-anan", fullName: "Caga-anan, Ronjay Miguel H." },
+    { id: "1391257", lastName: "Compuesto", fullName: "Compuesto, Michelle Ann G." },
+    { id: "1391590", lastName: "Moreno", fullName: "Moreno, Vince Josh U." },
+    { id: "1388623", lastName: "Pairez", fullName: "Pairez, Yhoda Lyony Y." },
+
+    { id: "1393427", lastName: "Canete", fullName: "Canete, Joanna Westly" },
+
+    { id: "1390800", lastName: "Cañazares", fullName: "Cañazares, Nicolas M." },
+    { id: "1391392", lastName: "Caratao", fullName: "Caratao, Ada Roshlyn B." },
+    { id: "1392379", lastName: "Cavan", fullName: "Cavan, Jett Louie E." },
+    { id: "1391124", lastName: "Enriquez", fullName: "Enriquez, Neil Andrei V." },
+    { id: "1391268", lastName: "Gabutan", fullName: "Gabutan, Ayisha C." },
+    { id: "1391195", lastName: "Gualiza", fullName: "Gualiza, Miguela G." },
+    { id: "1391242", lastName: "Holiva", fullName: "Holiva, Princess Ella T." },
+    { id: "1391123", lastName: "Lagahit", fullName: "Lagahit, Jan Gyle U." },
+    { id: "1391359", lastName: "Lazareno", fullName: "Lazareno, Pearl Angelah R." },
+    { id: "1391132", lastName: "Martinez", fullName: "Martinez, Ray A." },
+    { id: "1391821", lastName: "Pineda", fullName: "Pineda, Marc Russel R." },
+    { id: "1392567", lastName: "Portolaso", fullName: "Portolaso, Gian Dave C." },
+    { id: "1392080", lastName: "Ragasajo", fullName: "Ragasajo, John Rainier O." },
+    { id: "1370261", lastName: "Requioma", fullName: "Requioma, Niño Raymond B." },
+    { id: "1391840", lastName: "Tamparong", fullName: "Tamparong, Nikko A." },
+    { id: "1391136", lastName: "Yatong", fullName: "Yatong, Shiela Marie L." },
+
+    { id: "1392366", lastName: "Arribato", fullName: "Arribato, Althea C." },
+    { id: "1391428", lastName: "Booc", fullName: "Booc, Jhon Dave M." },
+    { id: "1391276", lastName: "Cantillas", fullName: "Cantillas, Cedric Stephan M." },
+    { id: "1391814", lastName: "Lapasaran", fullName: "Lapasaran, Shaan H." },
+    { id: "1391273", lastName: "Pananganan", fullName: "Pananganan, Chrystian Jean F." },
+    { id: "1391125", lastName: "Vale", fullName: "Vale, Diana Rose B." }
         ];
 
         let activeCategory = "LINKS";
@@ -1119,7 +1153,7 @@ document.addEventListener("visibilitychange", () => {
         }
 
         function renderAnncExamPortal(feed) {
-            let html = `<h3 style="color:#fff; border-bottom: 1px solid #333; padding-bottom: 10px;">📋 ANNC Examination Portal</h3>`;
+            let html = `<h3 style="color:#fff; border-bottom: 1px solid #333; padding-bottom: 10px;">📋 Examination Portal</h3>`;
 
             const examPosts = cachedPosts.filter(p => p.type === 'exam_quiz');
 
@@ -1132,7 +1166,7 @@ document.addEventListener("visibilitychange", () => {
                     </div>
 
                     <div class="exam-gate-container">
-                        <h3>2. Author Questionnaire Creator Login</h3>
+                        <h3>2. Author Login</h3>
                         <input type="password" id="exam-author-code" placeholder="Enter Author Passcode">
                         <button onclick="loginExamAuthor()">Open Creator Studio</button>
                     </div>
