@@ -348,6 +348,17 @@
         }
         .quiz-option-btn:hover { background-color: #e2e2e2; }
 
+        /* Presence indicator dots */
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 6px;
+        }
+        .status-green { background-color: #2a9d8f; }
+        .status-blue { background-color: #3a86ff; }
+
         .logout-link {
             position: fixed;
             bottom: 85px;
@@ -584,24 +595,26 @@
         const AUTHOR_SECRET_CODE = "author123";
         const SPECTATOR_SECRET_CODE = "spectator123";
 
-        // Hardcoded authorized student database
         const AUTHORIZED_STUDENTS = [
             { id: "1388623", lastName: "Pairez", fullName: "Pairez, Yhoda Lyony Y." }
-            // You can add more students here following the same structure
         ];
 
         let activeCategory = "LINKS";
         let isUserAdmin = false;
         let cachedPosts = [];
+        let cachedPresence = [];
         let pollInterval = null;
         let currentExamSession = null;
+        let currentUserPresence = null;
+        let examStrikes = 0;
+        let activeExamTimestampForTracker = null;
 
         function loginAsStudent() {
             isUserAdmin = false;
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard-screen').classList.remove('hidden');
             adjustPostBoxVisibility();
-            fetchPostsFromCloud();
+            fetchDataFromCloud();
             startPolling();
         }
 
@@ -615,13 +628,18 @@
             document.getElementById('login-screen').classList.add('hidden');
             document.getElementById('dashboard-screen').classList.remove('hidden');
             adjustPostBoxVisibility();
-            fetchPostsFromCloud();
+            updatePresence("Developer Admin", "online");
+            fetchDataFromCloud();
             startPolling();
         }
 
         function logout() {
+            if (currentUserPresence) {
+                removePresence();
+            }
             isUserAdmin = false;
             currentExamSession = null;
+            currentUserPresence = null;
             if (pollInterval) clearInterval(pollInterval);
             document.getElementById('dashboard-screen').classList.add('hidden');
             document.getElementById('login-screen').classList.remove('hidden');
@@ -635,30 +653,39 @@
             btnElem.innerText = bodyElem.classList.contains('collapsed') ? "▼ Expand" : "▲ Collapse";
         }
 
-        function startPolling() {
-            if (pollInterval) clearInterval(pollInterval);
-            pollInterval = setInterval(async () => {
-                try {
-                    const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-                        headers: { 'X-Master-Key': JSONBIN_API_KEY },
-                        cache: 'no-store'
-                    });
-                    const result = await response.json();
-                    let latestPosts = result.record.posts || [];
-                    if (latestPosts.length > 0 && cachedPosts.length > 0) {
-                        if (latestPosts.length !== cachedPosts.length || latestPosts[0].timestamp !== cachedPosts[0].timestamp) {
-                            document.getElementById('notification-banner').classList.add('show');
-                        }
-                    }
-                } catch (e) {
-                    console.error("Polling check failed", e);
+// --- OPTIMIZED POLLING TIMER (30 Seconds) ---
+function startPolling() {
+    if (pollInterval) clearInterval(pollInterval);
+    
+    // Changed from 10000 (10s) to 30000 (30s) to safely handle 40 simultaneous visitors
+    pollInterval = setInterval(async () => {
+        try {
+            const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                headers: { 'X-Master-Key': JSONBIN_API_KEY },
+                cache: 'no-store'
+            });
+            const result = await response.json();
+            let latestPosts = result.record.posts || [];
+            
+            if (latestPosts.length > 0 && cachedPosts.length > 0) {
+                if (latestPosts.length !== cachedPosts.length || latestPosts[0].timestamp !== cachedPosts[0].timestamp) {
+                    document.getElementById('notification-banner').classList.add('show');
                 }
-            }, 10000);
+            }
+            
+            if (currentUserPresence) {
+                updatePresence(currentUserPresence.name, currentUserPresence.status);
+            }
+        } catch (e) {
+            console.error("Polling check failed", e);
         }
+    }, 30000); // 30,000 milliseconds = 30 seconds
+}
+
 
         function dismissAndRefresh() {
             document.getElementById('notification-banner').classList.remove('show');
-            fetchPostsFromCloud();
+            fetchDataFromCloud();
         }
 
         function filterCategory(cat) {
@@ -703,7 +730,6 @@
                 }
             }
         }
-
         function handleCategoryChange() {
             const cat = document.getElementById('post-category').value;
             const standardFields = document.getElementById('standard-post-fields');
@@ -719,21 +745,43 @@
             else standardFields.classList.remove('hidden');
         }
 
-        async function fetchPostsFromCloud() {
+        async function fetchDataFromCloud() {
             try {
                 const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
                     headers: { 'X-Master-Key': JSONBIN_API_KEY },
                     cache: 'no-store'
                 });
                 const result = await response.json();
-                cachedPosts = result.record.posts || [];
-                renderFeed();
+                let rawPosts = result.record.posts || [];
+                cachedPresence = result.record.presence || [];
+
+                const currentTime = new Date().getTime();
+                const dayMs = 24 * 60 * 60 * 1000;
+
+                let validPosts = rawPosts.filter(post => {
+                    const age = currentTime - post.timestamp;
+                    if (post.category === 'GC' || post.type === 'exam_quiz') {
+                        return age < (2 * dayMs); // Auto-delete after 2 days
+                    }
+                    if (post.category === 'ACTIVITIES' || post.category === 'CONFESSIONS' || post.type === 'quiz' || post.type === 'confession') {
+                        return age < (3 * dayMs); // Auto-delete after 3 days
+                    }
+                    return true;
+                });
+
+                if (validPosts.length !== rawPosts.length) {
+                    cachedPosts = validPosts;
+                    await saveToCloudCompletely(cachedPosts, cachedPresence);
+                } else {
+                    cachedPosts = validPosts;
+                    renderFeed();
+                }
             } catch (error) {
-                console.error("Error loading posts:", error);
+                console.error("Error loading data:", error);
             }
         }
 
-        async function savePostsToCloud(updatedPosts) {
+        async function saveToCloudCompletely(postsToSave, presenceToSave) {
             try {
                 const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
                     method: 'PUT',
@@ -741,19 +789,78 @@
                         'Content-Type': 'application/json',
                         'X-Master-Key': JSONBIN_API_KEY
                     },
-                    body: JSON.stringify({ posts: updatedPosts })
+                    body: JSON.stringify({ posts: postsToSave, presence: presenceToSave })
                 });
                 if (response.ok) {
-                    cachedPosts = updatedPosts;
+                    cachedPosts = postsToSave;
+                    cachedPresence = presenceToSave;
                     renderFeed();
-                } else {
-                    alert("Failed to save to cloud bin.");
                 }
             } catch (error) {
-                console.error("Error saving posts:", error);
+                console.error("Error saving data to cloud:", error);
             }
         }
 
+        async function updatePresence(name, status) {
+            currentUserPresence = { name, status, lastSeen: new Date().getTime() };
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_API_KEY },
+                    cache: 'no-store'
+                });
+                const data = await res.json();
+                let currentP = data.record.presence || [];
+                let posts = data.record.posts || [];
+
+                let existingIndex = currentP.findIndex(p => p.name === name);
+                if (existingIndex >= 0) {
+                    currentP[existingIndex] = currentUserPresence;
+                } else {
+                    currentP.push(currentUserPresence);
+                }
+
+                const now = new Date().getTime();
+                currentP = currentP.filter(p => now - p.lastSeen < 45000);
+
+                await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
+                    },
+                    body: JSON.stringify({ posts, presence: currentP })
+                });
+                cachedPresence = currentP;
+            } catch (e) {
+                console.error("Presence update error", e);
+            }
+        }
+
+        async function removePresence() {
+            if (!currentUserPresence) return;
+            try {
+                const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                    headers: { 'X-Master-Key': JSONBIN_API_KEY },
+                    cache: 'no-store'
+                });
+                const data = await res.json();
+                let currentP = data.record.presence || [];
+                let posts = data.record.posts || [];
+
+                currentP = currentP.filter(p => p.name !== currentUserPresence.name);
+
+                await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': JSONBIN_API_KEY
+                    },
+                    body: JSON.stringify({ posts, presence: currentP })
+                });
+            } catch (e) {
+                console.error("Remove presence error", e);
+            }
+        }
         // --- ANNC EXAM / QUIZ PORTAL HANDLERS ---
         function loginExamStudent() {
             const inputVal = document.getElementById('exam-student-id').value.trim();
@@ -762,7 +869,6 @@
                 return;
             }
 
-            // Check against hardcoded authorized student list (matches either ID number or case-insensitive last name)
             const matchedStudent = AUTHORIZED_STUDENTS.find(s => 
                 s.id === inputVal || s.lastName.toLowerCase() === inputVal.toLowerCase()
             );
@@ -776,6 +882,8 @@
             const studentId = matchedStudent ? matchedStudent.id : "ADMIN";
 
             currentExamSession = { role: 'student', identifier: studentId, name: studentName };
+            updatePresence(studentName, "taking_exam");
+            examStrikes = 0; // Reset anti-cheating strike count on new login
             renderFeed();
         }
 
@@ -786,6 +894,7 @@
                 return;
             }
             currentExamSession = { role: 'author' };
+            updatePresence("Author Creator", "online");
             renderFeed();
         }
 
@@ -796,6 +905,7 @@
                 return;
             }
             currentExamSession = { role: 'spectator' };
+            updatePresence("Spectator Observer", "online");
             renderFeed();
         }
 
@@ -808,8 +918,6 @@
                 <input type="text" placeholder="Question Text" class="q-text" style="width:100%; padding:8px; background:#222; color:#fff; border:1px solid #555; margin-bottom:6px; border-radius:4px;">
                 <select class="q-type" onchange="onExamTypeChange(this)" style="width:100%; padding:8px; background:#222; color:#fff; border:1px solid #555; margin-bottom:6px; border-radius:4px;">
                     <option value="mc">Multiple Choice (ABCD)</option>
-                    <option value="enum">Enumeration</option>
-                    <option value="fitb">Fill in the Blank</option>
                     <option value="tf">True or False</option>
                 </select>
                 <div class="q-options-container">
@@ -836,16 +944,12 @@
                     <input type="text" placeholder="Option D" class="opt-d" style="width:100%; padding:6px; background:#222; color:#fff; border:1px solid #444; margin-bottom:4px;">
                     <input type="text" placeholder="Correct Answer (e.g. A)" class="q-ans-mc" style="width:100%; padding:6px; background:#222; color:#fff; border:1px solid #444;">
                 `;
-            } else if (type === 'tf') {
+            } else {
                 optContainer.innerHTML = `
                     <select class="q-ans-tf" style="width:100%; padding:6px; background:#222; color:#fff; border:1px solid #444;">
                         <option value="True">True</option>
                         <option value="False">False</option>
                     </select>
-                `;
-            } else {
-                optContainer.innerHTML = `
-                    <input type="text" placeholder="Expected Correct Answer" class="q-ans-text" style="width:100%; padding:6px; background:#222; color:#fff; border:1px solid #444;">
                 `;
             }
         }
@@ -873,10 +977,8 @@
                         item.querySelector('.opt-d').value.trim()
                     ];
                     ans = item.querySelector('.q-ans-mc').value.trim().toUpperCase();
-                } else if (type === 'tf') {
-                    ans = item.querySelector('.q-ans-tf').value;
                 } else {
-                    ans = item.querySelector('.q-ans-text').value.trim();
+                    ans = item.querySelector('.q-ans-tf').value;
                 }
                 questions.push({ text, type, options, ans });
             });
@@ -893,7 +995,7 @@
                 time: `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} / ${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`
             };
 
-            await savePostsToCloud([examData, ...cachedPosts]);
+            await saveToCloudCompletely([examData, ...cachedPosts], cachedPresence);
             alert("Quiz / Examination published successfully!");
             currentExamSession = null;
         }
@@ -907,11 +1009,8 @@
             let total = exam.questions.length;
 
             exam.questions.forEach((q, idx) => {
-                const userAnsElem = document.querySelector(`[name="exam_q_${examTimestamp}_${idx}"]:checked`) || document.getElementById(`exam_q_txt_${examTimestamp}_${idx}`);
-                let userVal = "";
-                if (userAnsElem) {
-                    userVal = userAnsElem.value.trim();
-                }
+                const userAnsElem = document.querySelector(`[name="exam_q_${examTimestamp}_${idx}"]:checked`);
+                let userVal = userAnsElem ? userAnsElem.value.trim() : "";
                 if (userVal.toLowerCase() === q.ans.toLowerCase()) {
                     correctCount++;
                 } else {
@@ -925,17 +1024,35 @@
                 correct: correctCount,
                 wrong: wrongCount,
                 score: `${correctCount} / ${total}`,
+                strikes: examStrikes,
                 timestamp: new Date().getTime()
             };
 
             if (!exam.submissions) exam.submissions = [];
             exam.submissions.push(scoreRecord);
-            savePostsToCloud(cachedPosts);
+            saveToCloudCompletely(cachedPosts, cachedPresence);
 
-            alert(`Exam Submitted!\nCorrect: ${correctCount}\nWrong: ${wrongCount}\nScore: ${correctCount}/${total}`);
+            updatePresence(currentExamSession.name, "finished");
+
+            alert(`Exam Submitted!\nCorrect: ${correctCount}\nWrong: ${wrongCount}\nCheating Strikes: ${examStrikes}`);
             currentExamSession = null;
             renderFeed();
         }
+
+        // --- ANTI-CHEATING TAB SWITCH LISTENER ---
+document.addEventListener("visibilitychange", () => {
+    if (document.hidden && currentExamSession && currentExamSession.role === 'student' && activeExamTimestampForTracker) {
+        examStrikes++;
+        
+        // Instead of immediate harsh punishment, give a clear visual warning
+        alert(`⚠️ WARNING #${examStrikes}: You have navigated away from the exam screen. Please remain on this tab (even if using Google Meet on another screen/window).`);
+        
+        if (examStrikes >= 5) { // Increased threshold to account for accidental clicks
+            alert("Maximum violations reached. Auto-submitting exam.");
+            submitStudentExam(activeExamTimestampForTracker);
+        }
+    }
+});
 
         // --- RENDER FEED ---
         function renderFeed() {
@@ -991,7 +1108,7 @@
                     return `
                         <div class="announcement-item">
                             <div class="announcement-meta">
-                                <span>${escapeHtml(p.author)} [${escapeHtml(p.time)}]</span>
+                                ${escapeHtml(p.author)} [${escapeHtml(p.time)}]
                                 ${deleteButtonHtml}
                             </div>
                             <div class="announcement-text">${linkifyText(p.text)}</div>
@@ -1023,19 +1140,36 @@
                     <div class="exam-gate-container">
                         <h3>3. Spectator Scoreboard Login</h3>
                         <input type="password" id="exam-spectator-code" placeholder="Enter Spectator Passcode">
-                        <button onclick="loginExamSpectator()">View Scores</button>
+                        <button onclick="loginExamSpectator()">View Scores & Presence</button>
                     </div>
                 `;
             } else if (currentExamSession.role === 'student') {
                 html += `<button onclick="currentExamSession=null; renderFeed();" style="background:#444; color:#fff; border:none; padding:6px 12px; border-radius:4px; margin-bottom:15px; cursor:pointer;">⬅ Back to Portals</button>`;
+                
                 if (examPosts.length === 0) {
                     html += `<div style="color:#888;">No active examinations posted yet.</div>`;
                 } else {
                     examPosts.forEach(exam => {
+                        // --- ONE-TIME EXAM CHECKER ---
+                        // Check if this student has already submitted this specific questionnaire
+                        const hasAlreadyTaken = exam.submissions && exam.submissions.some(sub => sub.studentId === currentExamSession.identifier);
+
+                        if (hasAlreadyTaken && !isUserAdmin) {
+                            html += `
+                                <div class="announcement-item" style="max-width:100%; background:#2c1b1b; color:#fff;">
+                                    <h4>Exam: ${escapeHtml(exam.title)}</h4>
+                                    <p style="color:#ff6b6b; font-weight:bold;">⛔ You have already completed this examination. You cannot retake it unless the author posts a new questionnaire.</p>
+                                </div>
+                            `;
+                            return;
+                        }
+
+                        activeExamTimestampForTracker = exam.timestamp;
                         let questionsToDisplay = [...exam.questions];
                         if (exam.randomize) {
                             questionsToDisplay.sort(() => Math.random() - 0.5);
                         }
+
                         html += `
                             <div class="announcement-item" style="max-width:100%;">
                                 <div class="announcement-meta"><span>Exam: ${escapeHtml(exam.title)}</span><span>[${exam.time}]</span></div>
@@ -1048,13 +1182,11 @@
                                     const optLetter = String.fromCharCode(65 + optIdx);
                                     html += `<label style="display:block; margin-bottom:4px; font-weight:normal; cursor:pointer;"><input type="radio" name="exam_q_${exam.timestamp}_${qIdx}" value="${optLetter}"> ${optLetter}. ${escapeHtml(opt)}</label>`;
                                 });
-                            } else if (q.type === 'tf') {
+                            } else {
                                 html += `
                                     <label style="display:block; margin-bottom:4px; font-weight:normal;"><input type="radio" name="exam_q_${exam.timestamp}_${qIdx}" value="True"> True</label>
                                     <label style="display:block; margin-bottom:4px; font-weight:normal;"><input type="radio" name="exam_q_${exam.timestamp}_${qIdx}" value="False"> False</label>
                                 `;
-                            } else {
-                                html += `<input type="text" id="exam_q_txt_${exam.timestamp}_${qIdx}" placeholder="Type your answer here..." style="width:100%; padding:6px; background:#fff; border:1px solid #888; border-radius:4px; color:#000;">`;
                             }
                         });
                         html += `
@@ -1081,8 +1213,26 @@
             } else if (currentExamSession.role === 'spectator') {
                 html += `
                     <button onclick="currentExamSession=null; renderFeed();" style="background:#444; color:#fff; border:none; padding:6px 12px; border-radius:4px; margin-bottom:15px; cursor:pointer;">⬅ Back to Portals</button>
-                    <h3>👀 Spectator Scoreboard</h3>
+                    <h3>👀 Spectator Scoreboard & Live Presence</h3>
                 `;
+
+                html += `
+                    <div class="announcement-item" style="max-width:100%; background:#222; color:#fff;">
+                        <h4 style="margin-top:0; border-bottom:1px solid #444; padding-bottom:6px;">🟢 Active Users & Status</h4>
+                `;
+                if (!cachedPresence || cachedPresence.length === 0) {
+                    html += `<div style="color:#aaa; font-size:13px;">No active users online right now.</div>`;
+                } else {
+                    html += `<ul style="list-style:none; padding:0; margin:0; font-size:14px;">`;
+                    cachedPresence.forEach(p => {
+                        const dotClass = (p.status === 'finished') ? 'status-blue' : 'status-green';
+                        const statusText = (p.status === 'finished') ? 'Finished Exam' : (p.status === 'taking_exam' ? 'Taking Exam' : 'Online / Active');
+                        html += `<li style="margin-bottom:6px; display:flex; align-items:center;"><span class="status-dot ${dotClass}"></span><b>${escapeHtml(p.name)}</b> &nbsp; <span style="color:#aaa; font-size:12px;">(${statusText})</span></li>`;
+                    });
+                    html += `</ul>`;
+                }
+                html += `</div>`;
+
                 if (examPosts.length === 0) {
                     html += `<div style="color:#888;">No examinations available to inspect.</div>`;
                 } else {
@@ -1096,20 +1246,24 @@
                         } else {
                             html += `
                                 <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:14px;">
-                                    <tr style="background:#ccc; text-align:left;">
+                                    <tr style="background:#ccc; text-align:left; color:#111;">
                                         <th style="padding:6px;">ID / Name</th>
                                         <th style="padding:6px;">Correct</th>
                                         <th style="padding:6px;">Wrong</th>
                                         <th style="padding:6px;">Score</th>
+                                        <th style="padding:6px;">Cheating Strikes</th>
                                     </tr>
                             `;
-                            exam.submissions.forEach(sub => {
+                            exam.submissions.forEach((sub, subIdx) => {
+                                const deleteScoreBtn = isUserAdmin ? `<button class="delete-btn" onclick="deleteScoreRecord(${exam.timestamp}, ${subIdx})">🗑️</button>` : '';
+                                const strikeColor = (sub.strikes || 0) > 0 ? "#9b2226" : "#1b4332";
                                 html += `
-                                    <tr style="border-bottom:1px solid #bbb;">
-                                        <td style="padding:6px;">${escapeHtml(sub.studentId)} - ${escapeHtml(sub.studentName)}</td>
+                                    <tr style="border-bottom:1px solid #bbb; color:#111;">
+                                        <td style="padding:6px;">${escapeHtml(sub.studentId)} - ${escapeHtml(sub.studentName)} ${deleteScoreBtn}</td>
                                         <td style="padding:6px; color:#1b4332; font-weight:bold;">${sub.correct}</td>
                                         <td style="padding:6px; color:#9b2226; font-weight:bold;">${sub.wrong}</td>
                                         <td style="padding:6px; font-weight:bold;">${sub.score}</td>
+                                        <td style="padding:6px; color:${strikeColor}; font-weight:bold;">${sub.strikes || 0} strikes</td>
                                     </tr>
                                 `;
                             });
@@ -1122,14 +1276,28 @@
 
             feed.innerHTML = html;
         }
+
         async function deletePost(timestamp) {
             if (!isUserAdmin) return;
-            if (!confirm("Are you sure you want to delete this specific post?")) return;
+            if (!confirm("Are you sure you want to delete this post?")) return;
 
             const updatedPosts = cachedPosts.filter(p => Number(p.timestamp) !== Number(timestamp));
-            await savePostsToCloud(updatedPosts);
+            await saveToCloudCompletely(updatedPosts, cachedPresence);
         }
 
+        async function deleteScoreRecord(examTimestamp, subIndex) {
+            if (!isUserAdmin) {
+                alert("Only the developer can delete student score records.");
+                return;
+            }
+            if (!confirm("Are you sure you want to delete this student's score record?")) return;
+
+            const exam = cachedPosts.find(p => Number(p.timestamp) === Number(examTimestamp));
+            if (exam && exam.submissions) {
+                exam.submissions.splice(subIndex, 1);
+                await saveToCloudCompletely(cachedPosts, cachedPresence);
+            }
+        }
         function checkQuizAnswer(postIndex, chosenOption, correctOption) {
             const resultDiv = document.getElementById(`quiz-result-${postIndex}`);
             const explanationDiv = document.getElementById(`quiz-explanation-${postIndex}`);
@@ -1195,4 +1363,4 @@
         }
     </script>
 </body>
-</html>        
+</html>
