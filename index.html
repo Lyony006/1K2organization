@@ -1113,44 +1113,74 @@ async function publishPost() {
             currentExamSession = null;
         }
 
-        function submitStudentExam(examTimestamp) {
-            const exam = cachedPosts.find(p => Number(p.timestamp) === Number(examTimestamp));
-            if (!exam) return;
+async function submitStudentExam(examTimestamp) {
+    if (!currentExamSession || currentExamSession.role !== 'student') return;
 
-            let correctCount = 0;
-            let wrongCount = 0;
-            let total = exam.questions.length;
+    try {
+        // 1. Fetch the absolute latest data from JSONBin to prevent overwriting other users' submissions
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+            headers: { 'X-Master-Key': JSONBIN_API_KEY },
+            cache: 'no-store'
+        });
+        const result = await response.json();
+        let freshPosts = result.record.posts || [];
+        let freshPresence = result.record.presence || [];
 
-            exam.questions.forEach((q, idx) => {
-                const userAnsElem = document.querySelector(`[name="exam_q_${examTimestamp}_${idx}"]:checked`);
-                let userVal = userAnsElem ? userAnsElem.value.trim() : "";
-                if (userVal.toLowerCase() === q.ans.toLowerCase()) {
-                    correctCount++;
-                } else {
-                    wrongCount++;
-                }
-            });
+        // 2. Find the specific exam inside the fresh data
+        const exam = freshPosts.find(p => Number(p.timestamp) === Number(examTimestamp));
+        if (!exam) {
+            alert("Error: Examination record not found on the server.");
+            return;
+        }
 
-            const scoreRecord = {
-                studentId: currentExamSession.identifier,
-                studentName: currentExamSession.name,
-                correct: correctCount,
-                wrong: wrongCount,
-                score: `${correctCount} / ${total}`,
-                strikes: examStrikes,
-                timestamp: new Date().getTime()
-            };
-
-            if (!exam.submissions) exam.submissions = [];
-            exam.submissions.push(scoreRecord);
-            saveToCloudCompletely(cachedPosts, cachedPresence);
-
-            updatePresence(currentExamSession.name, "finished");
-
-            alert(`Exam Submitted!\nCorrect: ${correctCount}\nWrong: ${wrongCount}\nCheating Strikes: ${examStrikes}`);
+        // 3. Double-check if already submitted in the fresh server data
+        if (exam.submissions && exam.submissions.some(sub => sub.studentId === currentExamSession.identifier)) {
+            alert("You have already submitted this examination!");
             currentExamSession = null;
             renderFeed();
+            return;
         }
+
+        let correctCount = 0;
+        let wrongCount = 0;
+        let total = exam.questions.length;
+
+        exam.questions.forEach((q, idx) => {
+            const userAnsElem = document.querySelector(`[name="exam_q_${examTimestamp}_${idx}"]:checked`);
+            let userVal = userAnsElem ? userAnsElem.value.trim() : "";
+            if (userVal.toLowerCase() === q.ans.toLowerCase()) {
+                correctCount++;
+            } else {
+                wrongCount++;
+            }
+        });
+
+        const scoreRecord = {
+            studentId: currentExamSession.identifier,
+            studentName: currentExamSession.name,
+            correct: correctCount,
+            wrong: wrongCount,
+            score: `${correctCount} / ${total}`,
+            strikes: examStrikes,
+            timestamp: new Date().getTime()
+        };
+
+        if (!exam.submissions) exam.submissions = [];
+        exam.submissions.push(scoreRecord);
+
+        // 4. Save the freshly updated posts array back to JSONBin
+        await saveToCloudCompletely(freshPosts, freshPresence);
+
+        updatePresence(currentExamSession.name, "finished");
+
+        alert(`Exam Submitted Successfully!\nCorrect: ${correctCount}\nWrong: ${wrongCount}\nCheating Strikes: ${examStrikes}`);
+        currentExamSession = null;
+        fetchDataFromCloud(); // Refresh local cache
+    } catch (error) {
+        console.error("Failed to submit exam securely:", error);
+        alert("Submission failed due to a network error. Please try again.");
+    }
+}
 
         // --- ANTI-CHEATING TAB SWITCH LISTENER ---
 document.addEventListener("visibilitychange", () => {
@@ -1390,27 +1420,67 @@ document.addEventListener("visibilitychange", () => {
             feed.innerHTML = html;
         }
 
-        async function deletePost(timestamp) {
-            if (!isUserAdmin) return;
-            if (!confirm("Are you sure you want to delete this post?")) return;
+// --- SECURE DEVELOPER POST / QUIZ DELETION ---
+async function deletePost(timestamp) {
+    if (!isUserAdmin) {
+        alert("Unauthorized: Only the developer can delete quizzes and announcements.");
+        return;
+    }
+    if (!confirm("Are you sure you want to delete this post or quiz?")) return;
 
-            const updatedPosts = cachedPosts.filter(p => Number(p.timestamp) !== Number(timestamp));
-            await saveToCloudCompletely(updatedPosts, cachedPresence);
+    try {
+        // Fetch latest state to prevent race conditions
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+            headers: { 'X-Master-Key': JSONBIN_API_KEY },
+            cache: 'no-store'
+        });
+        const result = await response.json();
+        let freshPosts = result.record.posts || [];
+        let freshPresence = result.record.presence || [];
+
+        // Filter out the deleted post
+        const updatedPosts = freshPosts.filter(p => Number(p.timestamp) !== Number(timestamp));
+        await saveToCloudCompletely(updatedPosts, freshPresence);
+        
+        alert("Item deleted successfully.");
+    } catch (error) {
+        console.error("Failed to delete post:", error);
+        alert("Error deleting item from cloud.");
+    }
+}
+
+// --- SECURE DEVELOPER SCORE RECORD DELETION ---
+async function deleteScoreRecord(examTimestamp, subIndex) {
+    if (!isUserAdmin) {
+        alert("Unauthorized: Only the developer can delete student score records.");
+        return;
+    }
+    if (!confirm("Are you sure you want to delete this student's score entry?")) return;
+
+    try {
+        // Fetch fresh data from JSONBin before modifying submissions
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+            headers: { 'X-Master-Key': JSONBIN_API_KEY },
+            cache: 'no-store'
+        });
+        const result = await response.json();
+        let freshPosts = result.record.posts || [];
+        let freshPresence = result.record.presence || [];
+
+        const exam = freshPosts.find(p => Number(p.timestamp) === Number(examTimestamp));
+        if (exam && exam.submissions) {
+            exam.submissions.splice(subIndex, 1);
+            await saveToCloudCompletely(freshPosts, freshPresence);
+            alert("Student score record deleted successfully.");
+        } else {
+            alert("Examination or submission record not found.");
         }
+    } catch (error) {
+        console.error("Failed to delete score record:", error);
+        alert("Error deleting score record from cloud.");
+    }
+}
 
-        async function deleteScoreRecord(examTimestamp, subIndex) {
-            if (!isUserAdmin) {
-                alert("Only the developer can delete student score records.");
-                return;
-            }
-            if (!confirm("Are you sure you want to delete this student's score record?")) return;
-
-            const exam = cachedPosts.find(p => Number(p.timestamp) === Number(examTimestamp));
-            if (exam && exam.submissions) {
-                exam.submissions.splice(subIndex, 1);
-                await saveToCloudCompletely(cachedPosts, cachedPresence);
-            }
-        }
         function checkQuizAnswer(postIndex, chosenOption, correctOption) {
             const resultDiv = document.getElementById(`quiz-result-${postIndex}`);
             const explanationDiv = document.getElementById(`quiz-explanation-${postIndex}`);
