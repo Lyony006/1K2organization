@@ -869,6 +869,85 @@ function startPolling() {
                 console.error("Presence update error", e);
             }
         }
+async function publishPost() {
+    const categorySelect = document.getElementById('post-category');
+    const category = categorySelect.value;
+    const textInput = document.getElementById('post-text');
+    
+    let newPost = {};
+    const now = new Date();
+    const timeString = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')} / ${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+    const authorName = isUserAdmin ? "Developer Admin" : "Student";
+
+    if (category === 'ACTIVITIES') {
+        const qAuthor = document.getElementById('quiz-author-name').value.trim() || authorName;
+        const question = document.getElementById('quiz-question').value.trim();
+        const opt1 = document.getElementById('quiz-opt1').value.trim();
+        const opt2 = document.getElementById('quiz-opt2').value.trim();
+        const opt3 = document.getElementById('quiz-opt3').value.trim();
+        const correct = parseInt(document.getElementById('quiz-correct').value);
+        const explanation = document.getElementById('quiz-explanation').value.trim();
+
+        if (!question || !opt1 || !opt2 || !opt3) {
+            alert("Please fill out the question and all options for the fun quiz!");
+            return;
+        }
+
+        newPost = {
+            category: 'ACTIVITIES',
+            type: 'quiz',
+            author: qAuthor,
+            question: question,
+            options: [opt1, opt2, opt3],
+            correct: correct,
+            explanation: explanation,
+            timestamp: now.getTime(),
+            time: timeString
+        };
+    } else if (category === 'CONFESSIONS') {
+        const confessionText = document.getElementById('confession-text').value.trim();
+        if (!confessionText) {
+            alert("Please type your confession before publishing!");
+            return;
+        }
+
+        newPost = {
+            category: 'CONFESSIONS',
+            type: 'confession',
+            author: 'Anonymous',
+            authorName: isUserAdmin ? "Admin Override" : "Anonymous Student",
+            text: confessionText,
+            timestamp: now.getTime(),
+            time: timeString
+        };
+    } else {
+        const textVal = textInput.value.trim();
+        if (!textVal) {
+            alert("Please type something to publish!");
+            return;
+        }
+
+        newPost = {
+            category: category,
+            type: 'standard',
+            author: authorName,
+            text: textVal,
+            timestamp: now.getTime(),
+            time: timeString
+        };
+    }
+
+    // Save to Cloud via JSONBin
+    const updatedPosts = [newPost, ...cachedPosts];
+    await saveToCloudCompletely(updatedPosts, cachedPresence);
+
+    // Clear inputs after successful post
+    textInput.value = "";
+    if (document.getElementById('quiz-question')) document.getElementById('quiz-question').value = "";
+    if (document.getElementById('confession-text')) document.getElementById('confession-text').value = "";
+    
+    alert("Published successfully!");
+}
 
         async function removePresence() {
             if (!currentUserPresence) return;
