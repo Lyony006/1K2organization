@@ -77,11 +77,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 30px;
+            font-size: 35px;
         }
 
         .brand-title {
-            font-size: 20px;
+            font-size: 18px;
             font-weight: bold;
             letter-spacing: 1px;
         }
@@ -187,7 +187,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 16px;
+            font-size: 22px;
         }
 
         .nav-item {
@@ -348,7 +348,6 @@
         }
         .quiz-option-btn:hover { background-color: #e2e2e2; }
 
-        /* Presence indicator dots */
         .status-dot {
             height: 10px;
             width: 10px;
@@ -434,7 +433,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 22px;
+            font-size: 25px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(255,255,255,0.2);
             z-index: 1000;
@@ -510,15 +509,15 @@
         <div class="sidebar">
             <div class="sidebar-brand">
                 <div class="sidebar-logo">❉</div>
-                <div style="font-size:10px;">
+                <div style="font-size:12px;">
                     <b>1-K2 ORGANIZATION</b><br>
                     <span style="color:#888;">DEVELOP BY YHODA LYONY Y.P.</span>
                 </div>
             </div>
-            <div class="nav-item active" onclick="filterCategory('LINKS')">LINKS</div>
-            <div class="nav-item" onclick="filterCategory('TEXT')">TEXT</div>
-            <div class="nav-item" onclick="filterCategory('GC')">ANNC / QUIZZES</div>
-            <div class="nav-item" onclick="filterCategory('ACTIVITIES')">Fun QUIZZES</div>
+            <div class="nav-item active" onclick="filterCategory('LINKS')">✤ LINKS</div>
+            <div class="nav-item" onclick="filterCategory('TEXT')">✤ TEXT</div>
+            <div class="nav-item" onclick="filterCategory('GC')">✤ E-QUIZ</div>
+            <div class="nav-item" onclick="filterCategory('ACTIVITIES')">✤ Q&A</div>
             <div class="nav-item" onclick="filterCategory('CONFESSIONS')">CONFESSIONS</div>
         </div>
 
@@ -533,7 +532,7 @@
                     <select id="post-category" onchange="handleCategoryChange()" style="margin-top: 10px; margin-bottom: 10px; padding: 6px; background:#222; color:white; border:1px solid #555; border-radius:4px; width:100%;">
                         <option value="LINKS">LINKS</option>
                         <option value="TEXT">TEXT</option>
-                        <option value="GC">ANNC</option>
+                        <option value="GC">E-QUIZ</option>
                         <option value="ACTIVITIES">ACTIVITIES (Fun Quiz)</option>
                         <option value="CONFESSIONS">CONFESSIONS (Anonymous)</option>
                     </select>
@@ -587,7 +586,6 @@
             </div>
         </div>
     </div>
-
     <script>
         const JSONBIN_BIN_ID = "6a92ee1af5f4af5e2951c25f";
         const JSONBIN_API_KEY = "$2a$10$KchZjS7XhA3UZUxc8l8dzuFMe13DrOfKuKVCrKvR2ujGpPDrtuhKC";
@@ -758,6 +756,7 @@
                 }
             }
         }
+
         function handleCategoryChange() {
             const cat = document.getElementById('post-category').value;
             const standardFields = document.getElementById('standard-post-fields');
@@ -889,8 +888,7 @@
                 console.error("Remove presence error", e);
             }
         }
-
-        // --- ANNC EXAM / QUIZ PORTAL HANDLERS ---
+        // --- EXAM / QUIZ PORTAL HANDLERS ---
         function loginExamStudent() {
             const inputVal = document.getElementById('exam-student-id').value.trim();
             if (!inputVal) {
@@ -961,6 +959,7 @@
             `;
             container.appendChild(qDiv);
         }
+
         function onExamTypeChange(selectElem) {
             const parent = selectElem.parentElement;
             const optContainer = parent.querySelector('.q-options-container');
@@ -973,12 +972,16 @@
                     <input type="text" placeholder="Option D" class="opt-d" style="width:100%; padding:6px; background:#222; color:#fff; border:1px solid #444; margin-bottom:4px;">
                     <input type="text" placeholder="Correct Answer (e.g. A)" class="q-ans-mc" style="width:100%; padding:6px; background:#222; color:#fff; border:1px solid #444;">
                 `;
-            } else {
+            } else if (type === 'tf') {
                 optContainer.innerHTML = `
                     <select class="q-ans-tf" style="width:100%; padding:6px; background:#222; color:#fff; border:1px solid #444;">
                         <option value="True">True</option>
                         <option value="False">False</option>
                     </select>
+                `;
+            } else if (type === 'enumeration') {
+                optContainer.innerHTML = `
+                    <input type="text" placeholder="Correct Answer / Keywords (e.g., CPU, RAM)" class="q-ans-enum" style="width:100%; padding:6px; background:#222; color:#fff; border:1px solid #444;">
                 `;
             }
         }
@@ -1006,9 +1009,11 @@
                         item.querySelector('.opt-c').value.trim(),
                         item.querySelector('.opt-d').value.trim()
                     ];
-                    ans = item.querySelector('.q-ans-mc').value.trim().toUpperCase();
-                } else {
+                    ans = item.querySelector('.q-ans-mc').value.trim();
+                } else if (type === 'tf') {
                     ans = item.querySelector('.q-ans-tf').value;
+                } else if (type === 'enumeration') {
+                    ans = item.querySelector('.q-ans-enum').value.trim();
                 }
                 questions.push({ text, type, options, ans });
             });
@@ -1032,7 +1037,6 @@
             currentExamSession = null;
         }
 
-        // --- AUTHOR TOGGLE LIVE / DELETE FOR ENTIRE QUIZ ---
         async function toggleQuizLiveStatus(examTimestamp) {
             try {
                 const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
@@ -1074,6 +1078,13 @@
             }
         }
 
+        function toggleAuthorExamPreview(timestamp) {
+            const previewElem = document.getElementById(`author-preview-${timestamp}`);
+            if (previewElem) {
+                previewElem.classList.toggle('hidden');
+            }
+        }
+
         function startExamTimer(durationSeconds, examTimestamp) {
             if (activeExamTimerInterval) clearInterval(activeExamTimerInterval);
             let timeLeft = durationSeconds;
@@ -1093,7 +1104,6 @@
                     clearInterval(activeExamTimerInterval);
                     timerDisplay.innerText = "⏰ Time is up! Answers are now frozen.";
                     
-                    // Freeze all input fields and radios for this exam
                     const formElem = document.getElementById(`exam-form-${examTimestamp}`);
                     if (formElem) {
                         const inputs = formElem.querySelectorAll('input, button[type="submit"]');
@@ -1136,8 +1146,15 @@
                 let total = exam.questions.length;
 
                 exam.questions.forEach((q, idx) => {
-                    const userAnsElem = document.querySelector(`[name="exam_q_${examTimestamp}_${idx}"]:checked`);
-                    let userVal = userAnsElem ? userAnsElem.value.trim() : "";
+                    let userVal = "";
+                    if (q.type === 'enumeration') {
+                        const inputElem = document.querySelector(`[name="exam_q_${examTimestamp}_${idx}"]`);
+                        userVal = inputElem ? inputElem.value.trim() : "";
+                    } else {
+                        const userAnsElem = document.querySelector(`[name="exam_q_${examTimestamp}_${idx}"]:checked`);
+                        userVal = userAnsElem ? userAnsElem.value.trim() : "";
+                    }
+
                     if (userVal.toLowerCase() === q.ans.toLowerCase()) {
                         correctCount++;
                     } else {
@@ -1182,6 +1199,7 @@
                 }
             }
         });
+
         // --- RENDER FEED ---
         function renderFeed() {
             const feed = document.getElementById('announcement-feed');
@@ -1245,9 +1263,8 @@
                 }
             }).join('');
         }
-
         function renderAnncExamPortal(feed) {
-            let html = `<h3 style="color:#fff; border-bottom: 1px solid #333; padding-bottom: 10px;">📋 ANNC Examination Portal</h3>`;
+            let html = `<h3 style="color:#fff; border-bottom: 1px solid #333; padding-bottom: 10px;">📋 Examination Portal / Экзамен</h3>`;
 
             const examPosts = cachedPosts.filter(p => p.type === 'exam_quiz');
 
@@ -1260,15 +1277,15 @@
                     </div>
 
                     <div class="exam-gate-container">
-                        <h3>2. Author Questionnaire Creator Login</h3>
+                        <h3>2. Author Login</h3>
                         <input type="password" id="exam-author-code" placeholder="Enter Author Passcode">
-                        <button onclick="loginExamAuthor()">Open Creator Studio</button>
+                        <button onclick="loginExamAuthor()">Proceed to Author Studio</button>
                     </div>
 
                     <div class="exam-gate-container">
-                        <h3>3. Spectator Scoreboard Login</h3>
+                        <h3>3. Spectator Login</h3>
                         <input type="password" id="exam-spectator-code" placeholder="Enter Spectator Passcode">
-                        <button onclick="loginExamSpectator()">View Scores & Presence</button>
+                        <button onclick="loginExamSpectator()">Proceed to Spectator Room</button>
                     </div>
                 `;
             } else if (currentExamSession.role === 'student') {
@@ -1314,10 +1331,14 @@
                                     const optLetter = String.fromCharCode(65 + optIdx);
                                     html += `<label style="display:block; margin-bottom:4px; font-weight:normal; cursor:pointer;"><input type="radio" name="exam_q_${exam.timestamp}_${qIdx}" value="${optLetter}"> ${optLetter}. ${escapeHtml(opt)}</label>`;
                                 });
-                            } else {
+                            } else if (q.type === 'tf') {
                                 html += `
                                     <label style="display:block; margin-bottom:4px; font-weight:normal;"><input type="radio" name="exam_q_${exam.timestamp}_${qIdx}" value="True"> True</label>
                                     <label style="display:block; margin-bottom:4px; font-weight:normal;"><input type="radio" name="exam_q_${exam.timestamp}_${qIdx}" value="False"> False</label>
+                                `;
+                            } else if (q.type === 'enumeration') {
+                                html += `
+                                    <input type="text" name="exam_q_${exam.timestamp}_${qIdx}" placeholder="Type your answer here" style="width:100%; padding:8px; background:#222; color:#fff; border:1px solid #555; border-radius:4px; margin-bottom:10px; outline:none;">
                                 `;
                             }
                         });
@@ -1340,7 +1361,7 @@
                         <div id="exam-questions-builder"></div>
                         <button onclick="addQuestionFieldToCreator()" style="background:#333; color:#fff; border:none; padding:8px 14px; border-radius:4px; margin-bottom:15px; cursor:pointer;">+ Add Question</button>
                         <br>
-                        <button onclick="publishExamQuiz()" style="background:#1b4332; color:#fff; border:none; padding:10px 20px; font-weight:bold; border-radius:4px; cursor:pointer; width:100%;">Publish Examination to ANNC</button>
+                        <button onclick="publishExamQuiz()" style="background:#1b4332; color:#fff; border:none; padding:10px 20px; font-weight:bold; border-radius:4px; cursor:pointer; width:100%;">Publish Examination to Server</button>
                     </div>
 
                     <div class="announcement-item" style="max-width:100%; background:#222; color:#fff;">
@@ -1356,14 +1377,26 @@
                         const liveButtonStyle = isLive ? "background:#d90429; color:#fff;" : "background:#2a9d8f; color:#fff;";
 
                         html += `
-                            <div style="background:#111; border:1px solid #444; padding:12px; border-radius:6px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
-                                <div>
-                                    <h4 style="margin:0 0 5px 0;">${escapeHtml(exam.title)}</h4>
-                                    <span style="font-size:12px; color:#aaa;">Questions: ${exam.questions.length} | Timer: ${exam.durationSeconds || 0}s | Status: ${isLive ? '🟢 Live' : '🔴 Unlive'}</span>
+                            <div style="background:#111; border:1px solid #444; padding:12px; border-radius:6px; margin-bottom:12px;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; cursor:pointer;" onclick="toggleAuthorExamPreview(${exam.timestamp})">
+                                    <div>
+                                        <h4 style="margin:0 0 5px 0;">📁 ${escapeHtml(exam.title)} 🔽</h4>
+                                        <span style="font-size:12px; color:#aaa;">Questions: ${exam.questions.length} | Timer: ${exam.durationSeconds || 0}s | Status: ${isLive ? '🟢 Live' : '🔴 Unlive'}</span>
+                                    </div>
+                                    <div style="display:flex; gap:8px;" onclick="event.stopPropagation()">
+                                        <button onclick="toggleQuizLiveStatus(${exam.timestamp})" style="${liveButtonStyle} border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">${liveButtonText}</button>
+                                        <button onclick="deleteEntireQuiz(${exam.timestamp})" style="background:#9b2226; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🗑️ Delete</button>
+                                    </div>
                                 </div>
-                                <div style="display:flex; gap:8px;">
-                                    <button onclick="toggleQuizLiveStatus(${exam.timestamp})" style="${liveButtonStyle} border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">${liveButtonText}</button>
-                                    <button onclick="deleteEntireQuiz(${exam.timestamp})" style="background:#9b2226; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🗑️ Delete</button>
+                                <div id="author-preview-${exam.timestamp}" class="hidden" style="margin-top:12px; border-top:1px solid #333; padding-top:10px;">
+                                    <ol style="padding-left:20px; margin:0; color:#ddd; font-size:14px;">
+                                        ${exam.questions.map((q, qIdx) => `
+                                            <li style="margin-bottom:6px;">
+                                                <strong>${escapeHtml(q.text)}</strong> (${q.type})<br>
+                                                <span style="color:#aaa; font-size:12px;">Answer: ${escapeHtml(q.ans)}</span>
+                                            </li>
+                                        `).join('')}
+                                    </ol>
                                 </div>
                             </div>
                         `;
@@ -1436,6 +1469,7 @@
 
             feed.innerHTML = html;
         }
+
         async function publishPost() {
             const categorySelect = document.getElementById('post-category');
             const category = categorySelect.value;
@@ -1634,4 +1668,4 @@
         }
     </script>
 </body>
-</html>        
+</html>
