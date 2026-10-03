@@ -485,7 +485,7 @@
         <div class="brand-header">
             <div class="logo-circle">❉</div>
             <div>
-                <div class="brand-title">BTVTED 1-K2 ORGANIZATION</div>
+                <div class="brand-title">BTVTED 1-K2 ORGANIZATION </div>
                 <div class="brand-sub">ALL RIGHTS RESERVED 2026</div>
             </div>
         </div>
@@ -788,7 +788,7 @@
                 let validPosts = rawPosts.filter(post => {
                     const age = currentTime - post.timestamp;
                     if (post.category === 'GC' || post.type === 'exam_quiz') {
-                        return age < (2 * dayMs);
+                        return age < (14 * dayMs);
                     }
                     if (post.category === 'ACTIVITIES' || post.category === 'CONFESSIONS' || post.type === 'quiz' || post.type === 'confession') {
                         return age < (3 * dayMs);
