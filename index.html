@@ -24,6 +24,11 @@
             align-items: center;
             min-height: 100vh;
             overflow-x: hidden;
+            /* Prevent text highlighting and copying */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none;    /* Firefox */
+            -ms-user-select: none;     /* Internet Explorer/Edge */
+            user-select: none;         /* Standard */            
         }
 
         .hidden { display: none !important; }
@@ -639,6 +644,27 @@
         let examStrikes = 0;
         let activeExamTimestampForTracker = null;
         let activeExamTimers = {};
+        
+    // --- SCOPED EXAM COPY & SHORTCUT PROTECTION HANDLERS ---
+    function handleExamContextMenu(e) {
+        if (currentExamSession && currentExamSession.role === 'student') {
+            e.preventDefault();
+            alert("✤ RIGHT-CLICK IS DISABLED DURING EXAMINATIONS ✤");
+        }
+    }
+
+    function handleExamKeydown(e) {
+        if (currentExamSession && currentExamSession.role === 'student') {
+            if (e.ctrlKey && (e.key === 'c' || e.key === 'C' || e.key === 'x' || e.key === 'X' || e.key === 'a' || e.key === 'A' || e.key === 'u' || e.key === 'U')) {
+                e.preventDefault();
+                alert("COPYING, SELECTING, or VIEWING IS NOT ALLOWED BY THE DEVELOPER");
+            }
+        }
+    }
+
+    // Attach security listeners globally once on page load
+    document.addEventListener('contextmenu', handleExamContextMenu);
+    document.addEventListener('keydown', handleExamKeydown);
 
         function loginAsStudent() {
             isUserAdmin = false;
@@ -1201,6 +1227,7 @@
                 }
             }
         });
+
 
         function renderFeed() {
             const feed = document.getElementById('announcement-feed');
