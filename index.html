@@ -814,7 +814,7 @@
                 let validPosts = rawPosts.filter(post => {
                     const age = currentTime - post.timestamp;
                     if (post.category === 'GC' || post.type === 'exam_quiz') {
-                        return age < (14 * dayMs);
+                        return age < (30 * dayMs);
                     }
                     if (post.category === 'ACTIVITIES' || post.category === 'CONFESSIONS' || post.type === 'quiz' || post.type === 'confession') {
                         return age < (3 * dayMs);
@@ -1416,12 +1416,12 @@
                             <div style="background:#111; border:1px solid #444; padding:12px; border-radius:6px; margin-bottom:12px;">
                                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; cursor:pointer;" onclick="toggleAuthorExamPreview(${exam.timestamp})">
                                     <div>
-                                        <h4 style="margin:0 0 5px 0;">📁 ${escapeHtml(exam.title)} 🔽</h4>
+                                        <h4 style="margin:0 0 5px 0;">📁 ${escapeHtml(exam.title)} </h4>
                                         <span style="font-size:12px; color:#aaa;">Questions: ${exam.questions.length} | Timer: ${exam.durationSeconds || 0}s | Status: ${isLive ? '🟢 Live' : '🔴 Unlive'}</span>
                                     </div>
                                     <div style="display:flex; gap:8px;" onclick="event.stopPropagation()">
                                         <button onclick="toggleQuizLiveStatus(${exam.timestamp})" style="${liveButtonStyle} border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">${liveButtonText}</button>
-                                        <button onclick="deleteEntireQuiz(${exam.timestamp})" style="background:#9b2226; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer;">🗑️ Delete</button>
+                                        <button onclick="deleteEntireQuiz(${exam.timestamp})" style="background:#9b2226; color:#fff; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer;"> Delete</button>
                                     </div>
                                 </div>
                                 <div id="author-preview-${exam.timestamp}" class="hidden" style="margin-top:12px; border-top:1px solid #333; padding-top:10px;">
@@ -1442,7 +1442,7 @@
             } else if (currentExamSession.role === 'spectator') {
                 html += `
                     <button onclick="currentExamSession=null; renderFeed();" style="background:#444; color:#fff; border:none; padding:6px 12px; border-radius:4px; margin-bottom:15px; cursor:pointer;">⬅ Back to Portals</button>
-                    <h3>👀 Spectator Scoreboard & Live Presence</h3>
+                    <h3>Spectator Scoreboard & Live Presence</h3>
                 `;
 
                 html += `
