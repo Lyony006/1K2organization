@@ -1207,7 +1207,7 @@
 
                 await saveToCloudCompletely(freshPosts, freshPresence);
 
-                alert(`Exam Submitted Successfully!\nCorrect: ${correctCount}\nWrong: ${wrongCount}\nCheating Strikes: ${examStrikes}`);
+                alert(`Exam Submitted Successfully!\n✤ CORRECT: ${correctCount}\nWrong: ${wrongCount}\nCheating Strikes: ${examStrikes}`);
                 fetchDataFromCloud();
             } catch (error) {
                 console.error("Failed to submit exam securely:", error);
@@ -1219,7 +1219,7 @@
         document.addEventListener("visibilitychange", () => {
             if (document.hidden && currentExamSession && currentExamSession.role === 'student' && activeExamTimestampForTracker) {
                 examStrikes++;
-                alert(`⚠️ CHEATING WARNING #${examStrikes}: Switching tabs or opening other applications during an exam is strictly forbidden!`);
+                alert(`✤ CHEATING WARNING #${examStrikes}: Switching tabs or opening other applications during an exam is strictly forbidden!`);
                 
                 if (examStrikes >= 3) {
                     alert("Maximum tab switches exceeded (3 strikes). Your examination is now auto-submitting.");
@@ -1250,7 +1250,7 @@
                     return `
                         <div class="announcement-item">
                             <div class="announcement-meta">
-                                <span>🎮 ${escapeHtml(p.author)} [${p.time}] - STUDENT ACTIVITY</span>
+                                <span>✤ ${escapeHtml(p.author)} [${p.time}] - STUDENT ACTIVITY</span>
                                 ${deleteButtonHtml}
                             </div>
                             <div class="announcement-text" style="font-weight:bold; margin-bottom: 8px;">🎯 ${escapeHtml(p.question)}</div>
@@ -1272,7 +1272,7 @@
                     return `
                         <div class="announcement-item">
                             <div class="announcement-meta">
-                                <span>💌 Anonymous Confession [${escapeHtml(p.time)}]</span>
+                                <span>۞ Anonymous Confession [${escapeHtml(p.time)}]</span>
                                 ${deleteButtonHtml}
                             </div>
                             <div class="announcement-text">${escapeHtml(p.text)}${devNameTag}</div>
@@ -1333,7 +1333,7 @@
                             html += `
                                 <div class="announcement-item" style="max-width:100%; background:#2c1b1b; color:#fff;">
                                     <h4>Exam: ${escapeHtml(exam.title)}</h4>
-                                    <p style="color:#ff6b6b; font-weight:bold;">⛔ You have already completed this examination. You cannot retake it.</p>
+                                    <p style="color:#ff6b6b; font-weight:bold;">⛔ Thanks for submitting, You have already completed this Examination. Have a great day Мой Друг! 🤗</p>
                                 </div>
                             `;
                             return;
