@@ -1215,18 +1215,41 @@
             }
         }
 
-        // --- ANTI-CHEATING TAB SWITCH LISTENER ---
+        // --- ANTI-CHEATING TAB SWITCH & SCREENSHOT PROTECTION HANDLERS ---
         document.addEventListener("visibilitychange", () => {
             if (document.hidden && currentExamSession && currentExamSession.role === 'student' && activeExamTimestampForTracker) {
-                examStrikes++;
-                alert(`✤ CHEATING WARNING #${examStrikes}: Switching tabs or opening other applications during an exam is strictly forbidden!`);
-                
-                if (examStrikes >= 3) {
-                    alert("Maximum tab switches exceeded (3 strikes). Your examination is now auto-submitting.");
-                    submitStudentExam(activeExamTimestampForTracker);
+                triggerCheatViolation("Switching tabs or minimizing the browser during an exam is strictly forbidden!");
+            }
+        });
+
+        // Intercept Screenshot Shortcuts and Key Combos (PrintScreen, Windows+Shift+S, Command+Shift+3/4 on Mac)
+        window.addEventListener('keydown', (e) => {
+            if (currentExamSession && currentExamSession.role === 'student' && activeExamTimestampForTracker) {
+                // Check for PrintScreen key or common OS screenshot combos (e.g., Meta/Windows + Shift + S)
+                if (e.key === 'PrintScreen' || (e.key === 'S' && e.shiftKey && (e.metaKey || e.ctrlKey))) {
+                    e.preventDefault();
+                    triggerCheatViolation("Taking screenshots or using capture tools during an exam is strictly forbidden!");
                 }
             }
         });
+
+        // Catch clipboard copy attempts which can be triggered by specific screenshot apps
+        document.addEventListener('copy', (e) => {
+            if (currentExamSession && currentExamSession.role === 'student' && activeExamTimestampForTracker) {
+                e.preventDefault();
+                triggerCheatViolation("Copying content or capturing screen data to the clipboard is not allowed!");
+            }
+        });
+
+        function triggerCheatViolation(reason) {
+            examStrikes++;
+            alert(`✤ SCREENSHOT / CHEATING WARNING #${examStrikes} / 3 ✤\n\n${reason}`);
+            
+            if (examStrikes >= 3) {
+                alert("Maximum cheating/screenshot strikes exceeded (3 strikes). Your examination is now auto-submitting.");
+                submitStudentExam(activeExamTimestampForTracker);
+            }
+        }
 
 
         function renderFeed() {
