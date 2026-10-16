@@ -32,6 +32,22 @@
         }
 
         .hidden { display: none !important; }
+/* --- FLOATING EXAM TIMER --- */
+.exam-timer-floating {
+    position: sticky;
+    top: 15px;
+    background-color: #1a1a1a;
+    border: 2px solid #9b2226;
+    color: #ff6b6b;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-weight: bold;
+    font-size: 14px;
+    z-index: 100;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    text-align: center;
+    margin-bottom: 15px;
+}
 
         /* --- NOTIFICATION BANNER --- */
         #notification-banner {
@@ -1374,11 +1390,13 @@
                             questionsToDisplay.sort(() => Math.random() - 0.5);
                         }
 
-                        html += `
-                            <div class="announcement-item" style="max-width:100%;">
-                                <div class="announcement-meta"><span>Exam: ${escapeHtml(exam.title)}</span><span id="timer-display-${exam.timestamp}" style="color:#9b2226; font-weight:bold;"></span></div>
-                                <form id="exam-form-${exam.timestamp}" onsubmit="event.preventDefault(); submitStudentExam(${exam.timestamp});">
-                        `;
+html += `
+    <div class="announcement-item" style="max-width:100%;">
+    <div id="timer-display-${exam.timestamp}" class="exam-timer-floating">⏳ Time Remaining: Loading...</div>
+        <div class="announcement-meta"><span>${escapeHtml(exam.title)}</span></div><div>
+        </div>
+        <form id="exam-form-${exam.timestamp}" onsubmit="event.preventDefault(); submitStudentExam(${exam.timestamp});">
+`;
                         
                         questionsToDisplay.forEach((item, displayIdx) => {
                             const q = item.q;
