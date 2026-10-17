@@ -10,7 +10,7 @@
             --bg-color: #000000;
             --card-bg: #c4c4c4;
             --text-dark: #111111;
-            --accent: #ffffff;
+            --accent: #F2F0EA;
         }
 
         body {
@@ -36,9 +36,9 @@
 .exam-timer-floating {
     position: sticky;
     top: 15px;
-    background-color: #1a1a1a;
-    border: 2px solid #9b2226;
-    color: #ff6b6b;
+    background-color: #111111;
+    border: 2px solid #D6B875;
+    color: #D6B875;
     padding: 10px 15px;
     border-radius: 8px;
     font-weight: bold;
@@ -93,7 +93,7 @@
         .logo-circle {
             width: 60px;
             height: 60px;
-            border: 3px solid white;
+            border: 3px solid #D6B875;
             border-radius: 50%;
             display: flex;
             justify-content: center;
@@ -113,10 +113,10 @@
         }
 
         .login-card {
-            background-color: #b5b5b5;
             color: var(--text-dark);
             width: 100%;
             padding: 30px 20px;
+            border: 2px solid #D6B875;
             border-radius: 25px;
             text-align: center;
             box-sizing: border-box;
@@ -124,14 +124,15 @@
 
         .login-card p {
             font-size: 14px;
+            color:white;
             font-weight: 500;
             margin-bottom: 15px;
         }
 
         .action-btn {
-            background-color: #1a1a1a;
+            background-color: #111111;
             color: white;
-            border: none;
+            border: 2px solid #D6B875;
             padding: 12px 0;
             width: 100%;
             border-radius: 25px;
@@ -213,7 +214,7 @@
 
         .nav-item {
             background-color: #737373;
-            color: white;
+            color: #F2F0EA;
             padding: 12px 20px;
             font-weight: bold;
             font-size: 15px;
@@ -236,6 +237,7 @@
             padding: 30px;
             overflow-y: auto;
             height: 100vh;
+            border:2px solid #D6B875;
             box-sizing: border-box;
             position: relative;
         }
@@ -245,7 +247,7 @@
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 25px;
-            border: 1px solid #444;
+            border: 2px solid #D6B875;
             position: sticky;
             top: 0;
             z-index: 5;
@@ -279,7 +281,7 @@
             width: 100%;
             background: #111;
             color: white;
-            border: 1px solid #555;
+            border: 1px solid #D6B875;
             padding: 10px;
             border-radius: 6px;
             box-sizing: border-box;
@@ -325,8 +327,8 @@
 
         /* --- EXAM & QUIZ PORTAL STYLES --- */
         .exam-gate-container-s {
-            background: #6495ED;
-            border: 2px solid #c4c4c4;
+            background: #3A5747;
+            border: 2px solid #D6B875;
             padding: 20px;
             border-radius: 12px;
             max-width: 500px;
@@ -336,26 +338,26 @@
         .exam-gate-container-s input {
             width: 100%;
             padding: 10px;
-            background: #222;
+            background: #111111;
             color: #fff;
-            border: 1px solid #fff;
+            border: 1px solid #D6B875;
             border-radius: 6px;
             margin-bottom: 12px;
             box-sizing: border-box;
         }
         .exam-gate-container-s button {
-            background: #228B22;
+            background: #ffffff;
             color: #111;
             border: none;
             padding: 10px 20px;
             font-weight: bold;
-            border-radius: 30px;
+            border-radius: 80px;
             cursor: pointer;
             width: 100%;
         }
         .exam-gate-container {
-            background: #1a1a1a;
-            border: 2px solid #c4c4c4;
+            background: #0B0B0D;
+            border: 2px solid #D6B875;
             padding: 20px;
             border-radius: 12px;
             max-width: 500px;
@@ -366,9 +368,9 @@
         .exam-gate-container input {
             width: 100%;
             padding: 10px;
-            background: #222;
+            background: #0B0B0D;
             color: #fff;
-            border: 1px solid #555;
+            border: 1px solid #D6B875;
             border-radius: 6px;
             margin-bottom: 12px;
             box-sizing: border-box;
@@ -387,7 +389,7 @@
         .quiz-container { margin-top: 10px; }
         .quiz-options { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
         .quiz-option-btn {
-            background-color: #f1f1f1;
+            background-color: #D6B875;
             border: 1px solid #888;
             padding: 8px 12px;
             border-radius: 4px;
@@ -477,7 +479,7 @@
             right: 25px;
             width: 50px;
             height: 50px;
-            background-color: #c4c4c4;
+            background-color: #D6B875;
             color: var(--text-dark);
             border-radius: 50%;
             display: flex;
@@ -496,7 +498,7 @@
             width: 280px;
             height: 350px;
             background-color: #1a1a1a;
-            border: 2px solid #c4c4c4;
+            border: 2px solid #D6B875;
             border-radius: 12px;
             display: flex;
             flex-direction: column;
@@ -505,7 +507,7 @@
         }
 
         .chat-header {
-            background-color: #c4c4c4;
+            background-color: #D6B875;
             color: var(--text-dark);
             padding: 8px 12px;
             font-weight: bold;
@@ -1288,10 +1290,10 @@
 
         function triggerCheatViolation(reason) {
             examStrikes++;
-            alert(`✤ SCREENSHOT / CHEATING WARNING #${examStrikes} / 3 ✤\n\n${reason}`);
+            alert(`✤ SCREENSHOT / CHEATING WARNING ${examStrikes} / 3 ✤\n\n${reason}`);
             
             if (examStrikes >= 3) {
-                alert("Maximum cheating/screenshot strikes exceeded (3 strikes). Your examination is now auto-submitting.");
+                alert("Maximum cheating strikes exceeded (3 strikes). Your examination is now auto-submitting.");
                 submitStudentExam(activeExamTimestampForTracker);
             }
         }
@@ -1387,7 +1389,7 @@
                     </div>
                 `;
             } else if (currentExamSession.role === 'student') {
-                html += `<button onclick="Object.values(activeExamTimers).forEach(t => clearInterval(t)); activeExamTimers={}; currentExamSession=null; renderFeed();" style="background:#444; color:#fff; border:none; padding:6px 12px; border-radius:4px; margin-bottom:15px; cursor:pointer;">⬅ Back to Portals</button>`;
+                html += `<button onclick="Object.values(activeExamTimers).forEach(t => clearInterval(t)); activeExamTimers={}; currentExamSession=null; renderFeed();" style="background:#111111; color:#D6B875; border: 2px solid #D6B875; padding:6px 12px; border-radius:4px; margin-bottom:15px; cursor:pointer;">⬅ Back to Portals</button>`;
                 
                 const liveExams = examPosts.filter(exam => exam.isLive !== false);
 
