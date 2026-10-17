@@ -324,6 +324,35 @@
         }
 
         /* --- EXAM & QUIZ PORTAL STYLES --- */
+        .exam-gate-container-s {
+            background: #6495ED;
+            border: 2px solid #c4c4c4;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 500px;
+            margin: 20px auto;
+            text-align: center;
+        } 
+        .exam-gate-container-s input {
+            width: 100%;
+            padding: 10px;
+            background: #222;
+            color: #fff;
+            border: 1px solid #fff;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            box-sizing: border-box;
+        }
+        .exam-gate-container-s button {
+            background: #228B22;
+            color: #111;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            width: 100%;
+        }
         .exam-gate-container {
             background: #1a1a1a;
             border: 2px solid #c4c4c4;
@@ -332,7 +361,7 @@
             max-width: 500px;
             margin: 20px auto;
             text-align: center;
-        }
+        }        
         .exam-gate-container h3 { margin-top: 0; color: #fff; }
         .exam-gate-container input {
             width: 100%;
@@ -1140,7 +1169,7 @@
 
                 let mins = Math.floor(timeLeft / 60);
                 let secs = timeLeft % 60;
-                currentDisplay.innerText = `⏳ Time Remaining: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                currentDisplay.innerText = `ᣜᳪᖞᔫᔕ ${mins}:${secs < 10 ? '0' : ''}${secs}  ᔓᔮᖝᳪᣝ`;
 
                 if (timeLeft <= 0) {
                     clearInterval(activeExamTimers[examTimestamp]);
@@ -1339,7 +1368,7 @@
 
             if (!currentExamSession) {
                 html += `
-                    <div class="exam-gate-container">
+                    <div class="exam-gate-container-s">
                         <h3>1. Student Examination Login</h3>
                         <input type="text" id="exam-student-id" placeholder="Enter ID Number or Last Name">
                         <button onclick="loginExamStudent()">Proceed to Quizzes</button>
@@ -1392,7 +1421,7 @@
 
 html += `
     <div class="announcement-item" style="max-width:100%;">
-    <div id="timer-display-${exam.timestamp}" class="exam-timer-floating">⏳ Time Remaining: Loading...</div>
+    <div id="timer-display-${exam.timestamp}" class="exam-timer-floating"> Time Remaining: Loading...</div>
         <div class="announcement-meta"><span>${escapeHtml(exam.title)}</span></div><div>
         </div>
         <form id="exam-form-${exam.timestamp}" onsubmit="event.preventDefault(); submitStudentExam(${exam.timestamp});">
