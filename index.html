@@ -7,7 +7,7 @@
 
     <style>
         :root {
-            --bg-color: #000000;
+            --bg-color: #523B35;
             --card-bg: #c4c4c4;
             --text-dark: #111111;
             --accent: #F2F0EA;
@@ -98,17 +98,17 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 35px;
+            font-size: 25px;
         }
 
         .brand-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             letter-spacing: 1px;
         }
 
         .brand-sub {
-            font-size: 10px;
+            font-size: 11.5px;
             color: #aaaaaa;
         }
 
@@ -161,7 +161,7 @@
         }
 
         .dev-input-row input::placeholder { color: #111111; }
-        .dev-input-row button { width: 120px; border-radius: 25px; margin-bottom: 0; }
+        .dev-input-row button { width: 120px; border-radius: 25px; margin-bottom: 0;}
 
         .footer-credit {
             margin-top: 40px;
@@ -209,11 +209,11 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 22px;
+            font-size: 18px;
         }
 
         .nav-item {
-            background-color: #737373;
+            background-color: #222;
             color: #F2F0EA;
             padding: 12px 20px;
             font-weight: bold;
@@ -221,12 +221,14 @@
             letter-spacing: 1px;
             margin-bottom: 8px;
             cursor: pointer;
-            border-left: 5px solid transparent;
+            border: 2px solid #D6B875;
+            border-radius: 10px;
         }
 
         .nav-item:hover, .nav-item.active {
-            background-color: #999999;
+            background-color: #D6B875;
             border-left-color: white;
+            color: #111;
         }
 
         .main-content {
@@ -364,7 +366,7 @@
             margin: 20px auto;
             text-align: center;
         }        
-        .exam-gate-container h3 { margin-top: 0; color: #fff; }
+        .exam-gate-container h3 { margin-top: 0; color: #white; }
         .exam-gate-container input {
             width: 100%;
             padding: 10px;
@@ -561,9 +563,9 @@
         <div class="sidebar">
             <div class="sidebar-brand">
                 <div class="sidebar-logo">❉</div>
-                <div style="font-size:12px;">
+                <div style="font-size:13px;">
                     <b>1-K2 ORGANIZATION</b><br>
-                    <span style="color:#888;">DEVELOP BY YHODA LYONY Y.P.</span>
+                    <span style="color:#aaaaaa; font-size:11px;">DEVELOP BY YHODA LYONY Y.P.</span>
                 </div>
             </div>
             <div class="nav-item" onclick="filterCategory('GC')">✤ E-QUIZ</div>            
@@ -655,7 +657,7 @@
             { id: "1391257", lastName: "Compuesto", fullName: "Compuesto, Michelle Ann G." },
             { id: "1391590", lastName: "Moreno", fullName: "Moreno, Vince Josh U." },
             { id: "1388623", lastName: "Pairez", fullName: "Pairez, Yhoda Lyony Y." },
-            { id: "1393427", lastName: "Canete", fullName: "Canete, Joanna Westly" },
+            { id: "1393427", lastName: "Cañete", fullName: "Cañete, Joanna Westly" },
             { id: "1390800", lastName: "Cañazares", fullName: "Cañazares, Nicolas M." },
             { id: "1391392", lastName: "Caratao", fullName: "Caratao, Ada Roshlyn B." },
             { id: "1392379", lastName: "Cavan", fullName: "Cavan, Jett Louie E." },
@@ -1309,7 +1311,7 @@
             }
 
             if (posts.length === 0) {
-                feed.innerHTML = `<div style="color: #666; font-style: italic; font-size: 14px;">No posts under ${activeCategory} yet.</div>`;
+                feed.innerHTML = `<div style="color: #aaaaaa; font-style: italic; font-size: 14px;">No posts under ${activeCategory} yet.</div>`;
                 return;
             }
 
@@ -1371,19 +1373,19 @@
             if (!currentExamSession) {
                 html += `
                     <div class="exam-gate-container-s">
-                        <h3>1. Student Examination Login</h3>
+                        <h3>♘ Student Examination Login</h3>
                         <input type="text" id="exam-student-id" placeholder="Enter ID Number or Last Name">
                         <button onclick="loginExamStudent()">Proceed to Quizzes</button>
                     </div>
 
                     <div class="exam-gate-container">
-                        <h3>2. Author Login</h3>
+                        <h3>♔ Author Login</h3>
                         <input type="password" id="exam-author-code" placeholder="Enter Author Passcode">
                         <button onclick="loginExamAuthor()">Proceed to Author Studio</button>
                     </div>
 
                     <div class="exam-gate-container">
-                        <h3>3. Spectator Login</h3>
+                        <h3>♖ Spectator Login</h3>
                         <input type="password" id="exam-spectator-code" placeholder="Enter Spectator Passcode">
                         <button onclick="loginExamSpectator()">Proceed to Spectator Room</button>
                     </div>
