@@ -417,10 +417,10 @@
         .logout-link {
             position: fixed;
             bottom: 85px;
-            right: 25px;
+            right: 23px;
             background: #333;
             color: white;
-            border: none;
+            border: 2px solid #D6B875;
             padding: 8px 14px;
             border-radius: 8px;
             cursor: pointer;
@@ -463,20 +463,20 @@
                 height: calc(100vh - 60px);
                 padding: 15px;
             }
-        .logout-link {
-            position: fixed;
-            bottom: 87px;
-            right: 2px;
-            background: #0D5C63;
-            color: white;
-            border: 2px solid #D6B875;
-            padding: 8px 14px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 12px;
-            z-index: 999;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-        }
+            .logout-link {
+                position: fixed;
+                background: #0D5C63;
+                color: white;
+                border: 2px solid #D6B875;
+                padding: 5px 5px;
+                border-radius: 4px;
+                cursor: pointer;
+                font-size: 12px;
+                bottom:80px;
+                right:6px;
+                z-index:999;
+            }
+            }
 
         /* --- FLOATING CHATBOT WIDGET --- */
         .chat-fab {
@@ -626,7 +626,7 @@
             <div id="announcement-feed"></div>
         </div>
 
-        <button class="logout-link" onclick="logout()">Exit Portal</button>
+        <button class="logout-link" onclick="logout()">EXIT</button>
 
         <div class="chat-fab" onclick="toggleChatWindow()" title="Chat with Vanya">❉</div>
 
