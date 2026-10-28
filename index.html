@@ -851,41 +851,80 @@
             else standardFields.classList.remove('hidden');
         }
 
-        async function fetchDataFromCloud() {
-            try {
-                const response = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
-                    headers: { 'X-Master-Key': JSONBIN_API_KEY },
-                    cache: 'no-store'
-                });
-                const result = await response.json();
-                let rawPosts = result.record.posts || [];
-                cachedPresence = result.record.presence || [];
 
-                const currentTime = new Date().getTime();
-                const dayMs = 24 * 60 * 60 * 1000;
+async function fetchDataFromCloud() {
+    const feed = document.getElementById("announcement-feed");
 
-                let validPosts = rawPosts.filter(post => {
-                    const age = currentTime - post.timestamp;
-                    if (post.category === 'GC' || post.type === 'exam_quiz') {
-                        return age < (30 * dayMs);
-                    }
-                    if (post.category === 'ACTIVITIES' || post.category === 'CONFESSIONS' || post.type === 'quiz' || post.type === 'confession') {
-                        return age < (3 * dayMs);
-                    }
-                    return true;
-                });
+    try {
+        console.log("Testing JSONBin connection...");
 
-                if (validPosts.length !== rawPosts.length) {
-                    cachedPosts = validPosts;
-                    await saveToCloudCompletely(cachedPosts, cachedPresence);
-                } else {
-                    cachedPosts = validPosts;
-                    renderFeed();
-                }
-            } catch (error) {
-                console.error("Error loading data:", error);
+        const response = await fetch(
+            `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`,
+            {
+                method: "GET",
+                headers: {
+                    "X-Master-Key": JSONBIN_API_KEY
+                },
+                cache: "no-store"
             }
+        );
+
+        const body = await response.text();
+
+        console.log("HTTP status:", response.status);
+        console.log("Response body:", body);
+
+if (!response.ok) {
+    throw new Error(
+        "JSONBin HTTP " +
+        response.status +
+        ": " +
+        body
+    );
+}
+
+        const result = JSON.parse(body);
+        const record = result.record;
+
+        if (!record || typeof record !== "object") {
+            throw new Error("JSONBin record is missing.");
         }
+
+        console.log("Record keys:", Object.keys(record));
+        console.log("Posts is an array:",
+            Array.isArray(record.posts));
+        console.log("Posts count:",
+            Array.isArray(record.posts)
+                ? record.posts.length
+                : "Not an array");
+        console.log("Presence is an array:",
+            Array.isArray(record.presence));
+
+        if (!Array.isArray(record.posts)) {
+            throw new Error(
+                "The record exists, but posts is missing or not an array."
+            );
+        }
+
+        // READ ONLY: Do not clean up or save anything.
+        cachedPosts = record.posts;
+        cachedPresence = Array.isArray(record.presence)
+            ? record.presence
+            : [];
+
+        renderFeed();
+
+        console.log("Read-only fetch test completed.");
+
+} catch (error) {
+    console.error("Fetch diagnostic failed:", error);
+
+    if (feed) {
+        feed.textContent =
+            "Diagnostic error: " + error.message;
+    }
+}
+}
 
         async function saveToCloudCompletely(postsToSave, presenceToSave) {
             try {
